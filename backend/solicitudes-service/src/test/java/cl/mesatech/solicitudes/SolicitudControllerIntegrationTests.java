@@ -107,6 +107,21 @@ class SolicitudControllerIntegrationTests {
                 .andExpect(jsonPath("$.timestamp").exists());
     }
 
+    @Test
+    void mantieneV1YV2FuncionandoSimultaneamente() throws Exception {
+        crearSolicitud("usuario-versiones", "Solicitud para comparar versiones");
+
+        mockMvc.perform(get("/v1/solicitudes"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].titulo").value("Solicitud para comparar versiones"))
+                .andExpect(jsonPath("$[0].diasAbierta").doesNotExist());
+
+        mockMvc.perform(get("/v2/solicitudes"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].titulo").value("Solicitud para comparar versiones"))
+                .andExpect(jsonPath("$[0].diasAbierta").isNumber());
+    }
+
     private Long crearSolicitud(String usuarioId, String titulo) throws Exception {
         mockMvc.perform(post("/v1/solicitudes")
                         .header("X-User-Id", usuarioId)

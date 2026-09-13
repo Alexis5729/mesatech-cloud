@@ -3,6 +3,7 @@ package cl.mesatech.solicitudes.service;
 import cl.mesatech.solicitudes.dto.ActualizarEstadoRequest;
 import cl.mesatech.solicitudes.dto.CrearSolicitudRequest;
 import cl.mesatech.solicitudes.dto.SolicitudResponse;
+import cl.mesatech.solicitudes.dto.SolicitudV2Response;
 import cl.mesatech.solicitudes.entity.EstadoSolicitud;
 import cl.mesatech.solicitudes.entity.Solicitud;
 import cl.mesatech.solicitudes.exception.SolicitudInvalidaException;
@@ -13,6 +14,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 // Contiene la lógica del negocio; el controlador solo recibe y devuelve datos HTTP.
@@ -45,6 +49,13 @@ public class SolicitudService {
         // El orden descendente entrega primero las solicitudes más recientes.
         return solicitudRepository.findAll(Sort.by(Sort.Direction.DESC, "fechaCreacion")).stream()
                 .map(this::convertir)
+                .toList();
+    }
+
+    public List<SolicitudV2Response> listarTodasV2() {
+        // V2 reutiliza la misma persistencia y solo amplía la representación de salida.
+        return solicitudRepository.findAll(Sort.by(Sort.Direction.DESC, "fechaCreacion")).stream()
+                .map(this::convertirV2)
                 .toList();
     }
 
@@ -91,5 +102,26 @@ public class SolicitudService {
                 solicitud.getEstado(),
                 solicitud.getFechaCreacion()
         );
+    }
+
+    private SolicitudV2Response convertirV2(Solicitud solicitud) {
+        return new SolicitudV2Response(
+                solicitud.getId(),
+                solicitud.getTitulo(),
+                solicitud.getDescripcion(),
+                solicitud.getCategoriaId(),
+                solicitud.getPrioridadId(),
+                solicitud.getUsuarioSolicitante(),
+                solicitud.getEstado(),
+                solicitud.getFechaCreacion(),
+                calcularDiasAbierta(solicitud)
+        );
+    }
+
+    private long calcularDiasAbierta(Solicitud solicitud) {
+        // Como la EP1 no guarda fecha de cierre, se cuentan días calendario desde la creación hasta hoy.
+        LocalDate fechaCreacion = solicitud.getFechaCreacion().toLocalDate();
+        long dias = ChronoUnit.DAYS.between(fechaCreacion, LocalDate.now(ZoneOffset.UTC));
+        return Math.max(dias, 0);
     }
 }

@@ -10,7 +10,7 @@ Microservicio del **Integrante 3** para crear, consultar y cambiar el estado de 
 - No valida JWT y no accede a Microsoft Entra ID; esas tareas pertenecen al BFF.
 - Guarda `categoriaId` y `prioridadId`. La validación contra el catálogo se integrará en una etapa posterior.
 
-## Endpoints v1
+## Endpoints
 
 | Método | Ruta | Uso |
 |---|---|---|
@@ -18,6 +18,7 @@ Microservicio del **Integrante 3** para crear, consultar y cambiar el estado de 
 | `GET` | `/v1/solicitudes/mias` | Consultar las solicitudes del usuario. Requiere `X-User-Id`. |
 | `GET` | `/v1/solicitudes` | Consultar todas las solicitudes. |
 | `PATCH` | `/v1/solicitudes/{id}/estado` | Cambiar el estado de una solicitud. |
+| `GET` | `/v2/solicitudes` | Consultar solicitudes agregando `diasAbierta`. |
 
 ### Crear una solicitud
 
@@ -37,6 +38,13 @@ Content-Type: application/json
 ```
 
 La solicitud se crea automáticamente con estado `CREADA`, fecha UTC y el usuario recibido en el header.
+
+## Versionamiento
+
+- `/v1/solicitudes` conserva exactamente los campos originales.
+- `/v2/solicitudes` devuelve los mismos campos y agrega `diasAbierta`.
+- `diasAbierta` cuenta los días calendario desde `fechaCreacion` hasta la fecha UTC actual.
+- No se guarda otro campo en la tabla, por lo que ambas versiones usan los mismos datos persistidos.
 
 ### Cambiar un estado
 
@@ -98,7 +106,7 @@ No se deben guardar contraseñas reales en Git.
 .\mvnw.cmd test
 ```
 
-Las pruebas usan H2 solo dentro del entorno de test. Cubren creación, consulta general, consulta por usuario, persistencia, flujo válido, transición inválida a `RESUELTA`, cancelación y errores del header.
+Las pruebas usan H2 solo dentro del entorno de test. Cubren creación, consulta general, consulta por usuario, persistencia, flujo válido, transición inválida a `RESUELTA`, cancelación, errores del header y funcionamiento simultáneo de v1 y v2.
 
 ## Estructura simple
 
@@ -114,6 +122,5 @@ exception/    entrega errores uniformes
 ## Pendiente de otras etapas
 
 - Integración del BFF con estos endpoints.
-- Implementación e integración de `catalogo-service`.
-- Endpoint equivalente `/v2` con `diasAbierta`.
+- Integración de `catalogo-service` con el BFF.
 - Instalación de PostgreSQL y despliegue en EC2.
