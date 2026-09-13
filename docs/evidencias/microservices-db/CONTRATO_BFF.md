@@ -9,7 +9,7 @@ Este documento indica lo que el Integrante 2 necesita para conectar el BFF con l
 | solicitudes-service | `http://localhost:8081` |
 | catalogo-service | `http://localhost:8082` |
 
-En EC2 las direcciones se reemplazarán mediante configuración; las rutas HTTP no cambian.
+En AWS el BFF y los microservicios estarán en dos EC2 distintas, dentro de la misma región y VPC. El Integrante 2 reemplazará `localhost` por la IP o DNS privado de la EC2 del Integrante 3; las rutas HTTP no cambian.
 
 ## Identidad del usuario
 
@@ -146,4 +146,6 @@ Códigos principales:
 - El BFF propaga `X-User-Id` hacia `solicitudes-service`.
 - Los microservicios aplican sus reglas y acceden a PostgreSQL.
 - El BFF no accede directamente a las tablas.
-- Las URL se configuran como variables del BFF cuando el Integrante 2 implemente la integración.
+- Las URL se configuran como variables del BFF usando la dirección privada de la EC2 del Integrante 3.
+- Los puertos `8081` y `8082` aceptan tráfico solamente desde la EC2 o el Security Group del BFF.
+- PostgreSQL `5432` no se expone al BFF ni a Internet.

@@ -13,24 +13,29 @@ No corresponde al Integrante 3 configurar React, Microsoft Entra ID, JWT Authori
 
 ## Alternativa acordada
 
-Se utilizará PostgreSQL instalado en EC2, en lugar de RDS, porque es suficiente para la EP1 y reduce servicios adicionales. La pauta permite una sola instancia EC2 con puertos distintos.
+El equipo confirmó el uso de **dos instancias EC2**. Se utilizará PostgreSQL instalado en la EC2 del Integrante 3, en lugar de RDS.
 
-Configuración sencilla recomendada para el equipo:
+Distribución acordada:
 
 ```text
-EC2
-├── BFF                 :8080  (Integrante 2)
-├── solicitudes-service :8081  (Integrante 3)
-├── catalogo-service    :8082  (Integrante 3)
-└── PostgreSQL          :5432  (Integrante 3, acceso local)
+React -> API Gateway -> EC2 Integrante 2
+                         └── BFF :8080
+                               |
+                               | red privada de AWS
+                               v
+                       EC2 Integrante 3
+                         ├── solicitudes-service :8081
+                         ├── catalogo-service    :8082
+                         └── PostgreSQL          :5432
 ```
 
-Si todos los componentes están en la misma instancia, el BFF puede llamar a `localhost:8081` y `localhost:8082`, y PostgreSQL no necesita exponerse a Internet.
+Las dos instancias deben quedar en la misma región y VPC. El BFF utilizará la IP privada o DNS privado de la EC2 del Integrante 3 para llamar a los microservicios. PostgreSQL será utilizado localmente por los microservicios y no se expondrá a Internet.
 
 ## Antes de entrar a AWS
 
-- [ ] Alexis confirma si usarán una sola EC2 compartida.
-- [ ] Alexis entrega al Integrante 3 acceso autorizado a la instancia o coordina la carga de los JAR.
+- [x] El equipo confirmó dos EC2: una para BFF/seguridad y otra para microservicios/BD.
+- [ ] Alexis confirma la región y VPC donde creará su EC2 para usar las mismas en ambas instancias.
+- [ ] Se acuerda el Security Group o la IP privada que utilizará el BFF para acceder a `8081` y `8082`.
 - [ ] Los dos JAR están generados con `clean package`.
 - [ ] La rama `damian/microservices-db` está actualizada y sin secretos.
 - [ ] La contraseña débil usada localmente se reemplaza por una contraseña fuerte para EC2.
@@ -52,11 +57,10 @@ La pauta solicita un informe pormenorizado con capturas de cada paso de configur
 
 - [ ] Captura del Security Group utilizado por la EC2.
 - [ ] Puerto `22` limitado a la IP de quienes administran la instancia.
-- [ ] Puerto del BFF gestionado por el Integrante 2 según la integración con API Gateway.
-- [ ] No publicar `5432` a `0.0.0.0/0` si PostgreSQL comparte la instancia.
-- [ ] No publicar `8081` ni `8082` a Internet si el BFF los consume por `localhost`.
-
-Si los microservicios se despliegan en otra instancia, permitir `8081` y `8082` solamente desde el Security Group o la IP privada de la instancia del BFF.
+- [ ] Permitir `8081` y `8082` solamente desde el Security Group de la EC2 del BFF, o desde su IP privada si el laboratorio no permite referenciar otro Security Group.
+- [ ] No publicar `8081` ni `8082` a `0.0.0.0/0`.
+- [ ] No publicar PostgreSQL `5432` a Internet: el BFF no debe acceder a la base de datos.
+- [ ] La configuración de entrada al BFF y del puerto `8080` corresponde al Integrante 2.
 
 ### 3. PostgreSQL en EC2
 
@@ -109,7 +113,8 @@ Las pruebas directas pueden ejecutarse con `curl` desde la propia EC2. La prueba
 
 - [ ] Entregar al Integrante 2 `CONTRATO_BFF.md`.
 - [ ] Confirmar que el BFF envía `X-User-Id`.
-- [ ] Confirmar que el BFF llama a `localhost:8081` y `localhost:8082`, o a las direcciones privadas acordadas.
+- [ ] Entregar al Integrante 2 la IP o DNS privado de la EC2 del Integrante 3.
+- [ ] Confirmar que el BFF llama a `<IP_PRIVADA_EC2_INTEGRANTE_3>:8081` y `<IP_PRIVADA_EC2_INTEGRANTE_3>:8082`.
 - [ ] Probar una operación de solicitudes y una de catálogo a través del BFF.
 - [ ] Confirmar que el BFF no contiene conexión a PostgreSQL.
 
