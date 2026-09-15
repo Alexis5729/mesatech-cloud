@@ -1,0 +1,15 @@
+server:
+  # Puerto acordado para catalogo-service.
+  port: ${CATALOGO_PORT:8082}
+
+spring:
+  application:
+    name: catalogo-service
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/mesatech}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:update}
