@@ -5,6 +5,14 @@ spring:
   application:
     name: mesatech-bff
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://login.microsoftonline.com/36e4a89a-590a-43c7-b9f3-3af8fffde2a0/v2.0
+          audiences:
+            - d09ac090-b77b-48fb-aa08-6eb796171c8b
+
 services:
   solicitudes:
     base-url: http://localhost:8081
