@@ -11,10 +11,9 @@ public class SolicitudClient {
     private final RestClient restClient;
 
     public SolicitudClient(
-            RestClient.Builder builder,
             @Value("${services.solicitudes.base-url}") String baseUrl){
 
-        this.restClient = builder
+        this.restClient = RestClient.builder()
                 .baseUrl(baseUrl)
                 .build();
     }

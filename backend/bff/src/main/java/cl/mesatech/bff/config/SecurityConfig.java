@@ -2,6 +2,7 @@ package cl.mesatech.bff.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -9,15 +10,17 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/health").permitAll()
-                        .requestMatchers("/v1/solicitudes").permitAll()
-                        .requestMatchers("/v1/solicitudes/mias").permitAll()
+                        .requestMatchers("/v1/solicitudes/**")
+                        .hasAuthority("SCOPE_access_as_user")
                         .anyRequest().denyAll()
-                );
+                )
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
         return http.build();
     }
 }
