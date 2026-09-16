@@ -4,3 +4,7 @@ server:
 spring:
   application:
     name: mesatech-bff
+
+services:
+  solicitudes:
+    base-url: http://localhost:8081

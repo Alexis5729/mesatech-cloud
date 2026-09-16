@@ -1,13 +1,18 @@
 package cl.mesatech.bff.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import cl.mesatech.bff.client.SolicitudClient;
+import cl.mesatech.bff.dto.CrearSolicitudRequest;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/v1/solicitudes")
 public class SoliciudController {
+
+    private final SolicitudClient solicitudClient;
+
+    public SoliciudController(SolicitudClient solicitudClient) {
+        this.solicitudClient = solicitudClient;
+    }
 
     @GetMapping
     public String obtenerSolicitudes(){
@@ -20,7 +25,7 @@ public class SoliciudController {
     }
 
     @PostMapping
-    public String crearSolicitud(){
-        return "Solicitud creada";
+    public String crearSolicitud(@RequestBody CrearSolicitudRequest request){
+        return solicitudClient.crearSolicitud(request);
     }
 }
