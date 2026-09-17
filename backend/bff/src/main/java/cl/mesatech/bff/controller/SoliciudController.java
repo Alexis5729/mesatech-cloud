@@ -16,12 +16,12 @@ public class SoliciudController {
 
     @GetMapping
     public String obtenerSolicitudes(){
-        return "Listado de solicitudes";
+        return solicitudClient.obtenerSolicitudes();
     }
 
     @GetMapping("/mias")
-    public String obtenerMisSolicitudes(){
-        return "Mis solicitudes";
+    public String obtenerMisSolicitudes(@RequestHeader("X-User-Id")String userId){
+        return solicitudClient.obtenerMisSolicitudes(userId);
     }
 
     @PostMapping
