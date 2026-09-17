@@ -27,4 +27,21 @@ public class SolicitudClient {
                 .body(String.class);
     }
 
+    public String obtenerSolicitudes(){
+        return restClient
+                .get()
+                .uri("/v1/solicitudes")
+                .retrieve()
+                .body(String.class);
+    }
+
+    public String obtenerMisSolicitudes(String userId){
+        return restClient
+                .get()
+                .uri("/v1/solicitudes/mias")
+                .header("X-User-Id", userId)
+                .retrieve()
+                .body(String.class);
+    }
+
 }
