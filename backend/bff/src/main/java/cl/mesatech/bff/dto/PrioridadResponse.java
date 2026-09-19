@@ -9,5 +9,5 @@ public class PrioridadResponse {
 
     private Long id;
     private String nombre;
-    private Integer nivel;
+    private int nivel;
 }

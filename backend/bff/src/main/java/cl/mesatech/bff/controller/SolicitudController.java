@@ -4,6 +4,7 @@ import cl.mesatech.bff.client.SolicitudClient;
 import cl.mesatech.bff.dto.ActualizarEstadoRequest;
 import cl.mesatech.bff.dto.CrearSolicitudRequest;
 import cl.mesatech.bff.dto.SolicitudResponse;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,7 +31,7 @@ public class SolicitudController {
     @PostMapping
     public SolicitudResponse crearSolicitud(
             @RequestHeader("X-User-Id") String userId,
-            @RequestBody CrearSolicitudRequest request){
+            @Valid @RequestBody CrearSolicitudRequest request){
 
         return solicitudClient.crearSolicitud(userId, request);
     }
@@ -38,7 +39,7 @@ public class SolicitudController {
     @PatchMapping("/{id}/estado")
     public SolicitudResponse actualizarEstado(
             @PathVariable Long id,
-            @RequestBody ActualizarEstadoRequest request){
+            @Valid @RequestBody ActualizarEstadoRequest request){
         return solicitudClient.actualizarEstado(id, request);
     }
 }
