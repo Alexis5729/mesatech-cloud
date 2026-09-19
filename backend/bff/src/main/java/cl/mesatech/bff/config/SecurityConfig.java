@@ -16,7 +16,9 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/health").permitAll()
-                        .requestMatchers("/v1/solicitudes/**")
+                        .requestMatchers(
+                                "/v1/solicitudes/**",
+                                "/v1/catalogo/**")
                         .hasAuthority("SCOPE_access_as_user")
                         .anyRequest().denyAll()
                 )
