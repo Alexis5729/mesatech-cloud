@@ -12,7 +12,7 @@ import {
 
 import { loginRequest } from "../auth/msalConfig";
 
-import "./Login.css";
+import "./login.css";
 
 
 function Login() {
