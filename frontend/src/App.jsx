@@ -7,7 +7,7 @@ import {
 
 import { useIsAuthenticated } from "@azure/msal-react";
 
-import Login from "./pages/Login";
+import Login from "./pages/login";
 import Home from "./pages/Home";
 
 
