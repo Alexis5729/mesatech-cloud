@@ -422,7 +422,7 @@ function Login() {
 
         <footer className="developer-signature">
 
-          Desarrollado por Alexis Problete, Damian Iturra y Francisco Vásquez | Sistema creado para la asignatura de Desarrollo Cloud Native 2026
+          Desarrollado por Alexis Poblete, Damian Iturra y Francisco Vásquez | Sistema creado para la asignatura de Desarrollo Cloud Native 2026
 
         </footer>
 
