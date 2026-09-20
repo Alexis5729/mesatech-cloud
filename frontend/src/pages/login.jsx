@@ -1,51 +1,45 @@
 import { useState } from "react";
+import { useMsal } from "@azure/msal-react";
+import { loginRequest } from "../auth/msalConfig";
 import "./Login.css";
 
 function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const { instance } = useMsal();
 
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (event) => {
+  const handleLogin = async (event) => {
     event.preventDefault();
 
-    // Limpiar errores anteriores
-    setEmailError("");
-    setPasswordError("");
+    setError("");
+    setLoading(true);
 
-    let isValid = true;
+    try {
+      // Iniciar sesión con Microsoft
+      const response = await instance.loginPopup(loginRequest);
 
-    // Validar correo
-    if (email.trim() === "") {
-      setEmailError("El correo electrónico es obligatorio");
-      isValid = false;
-    }
+      // Guardar la cuenta como cuenta activa
+      instance.setActiveAccount(response.account);
 
-    // Validar contraseña vacía
-    if (password.trim() === "") {
-      setPasswordError("La contraseña es obligatoria");
-      isValid = false;
-    }
+      console.log("Usuario autenticado:");
+      console.log(response.account);
 
-    // Validar longitud de contraseña
-    if (password.length > 0 && password.length < 6) {
-      setPasswordError(
-        "La contraseña debe tener al menos 6 caracteres"
+      console.log("Nombre:", response.account.name);
+      console.log("Correo:", response.account.username);
+
+      // Aquí posteriormente podemos redirigir al Home
+      // navigate("/home");
+
+    } catch (error) {
+      console.error("Error de login:", error);
+
+      setError(
+        "No fue posible iniciar sesión con Microsoft. Inténtalo nuevamente."
       );
-      isValid = false;
+    } finally {
+      setLoading(false);
     }
-
-    // Si hay errores, no continuar
-    if (!isValid) {
-      return;
-    }
-
-    // Por ahora solamente mostramos los datos en consola
-    console.log("Email:", email);
-    console.log("Password:", password);
-    console.log("Formulario válido");
   };
 
   return (
@@ -53,79 +47,54 @@ function Login() {
 
       <div className="login-container">
 
+        {/* ENCABEZADO */}
+
         <div className="login-header">
           <h1>MESATECH CLOUD</h1>
-          <p>Sistema ERP para PYMEs</p>
+
+          <p>
+            Sistema ERP para PYMEs
+          </p>
         </div>
+
+        {/* TARJETA LOGIN */}
 
         <div className="login-card">
 
           <h2>Iniciar sesión</h2>
 
           <p className="login-subtitle">
-            Ingresa tus credenciales para continuar
+            Ingresa con tu cuenta corporativa de Microsoft
           </p>
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleLogin}>
 
-            {/* CORREO */}
-
-            <div className="input-group">
-
-              <label htmlFor="email">
-                Correo electrónico
-              </label>
-
-              <input
-                id="email"
-                type="email"
-                placeholder="ejemplo@empresa.cl"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-              />
-
-              {emailError && (
-                <p className="error-message">
-                  {emailError}
-                </p>
-              )}
-
-            </div>
-
-            {/* CONTRASEÑA */}
-
-            <div className="input-group">
-
-              <label htmlFor="password">
-                Contraseña
-              </label>
-
-              <input
-                id="password"
-                type="password"
-                placeholder="Ingresa tu contraseña"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-              />
-
-              {passwordError && (
-                <p className="error-message">
-                  {passwordError}
-                </p>
-              )}
-
-            </div>
+            {/* BOTÓN MICROSOFT */}
 
             <button
               type="submit"
               className="login-button"
+              disabled={loading}
             >
-              Iniciar sesión
+              {loading
+                ? "Iniciando sesión..."
+                : "Iniciar sesión con Microsoft"}
             </button>
+
+            {/* ERROR */}
+
+            {error && (
+              <p className="error-message">
+                {error}
+              </p>
+            )}
 
           </form>
 
         </div>
+        <footer className="developer-signature">
+  Desarrollado por Alexis Problete,Damian Iturra y Francisco Vásquez | Siatema creado para la asignatura de Desarrollo de cloud native 2026
+</footer>
 
       </div>
 
