@@ -46,6 +46,20 @@ function Login() {
           account: userAccount,
         });
 
+    const payload = JSON.parse(
+        atob(
+            tokenResponse.accessToken
+                .split(".")[1]
+                .replace(/-/g, "+")
+                .replace(/_/g, "/")
+        )
+    );
+
+    console.log("Roles Access Token:", payload.roles);
+    console.log("Scope Access Token:", payload.scp);
+    console.log("Audience Access Token:", payload.aud);
+    console.log("OID Access Token:", payload.oid);
+
       console.log("Access Token obtenido correctamente");
 
       // Solo muestra una parte para no exponer
