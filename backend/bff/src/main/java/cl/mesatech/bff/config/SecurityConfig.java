@@ -60,6 +60,15 @@ public class SecurityConfig {
                         )
 
                         .requestMatchers(
+                                HttpMethod.GET,
+                                "/v2/solicitudes"
+                        )
+                        .hasAnyRole(
+                                "OPERADOR",
+                                "ADMINISTRADOR"
+                        )
+
+                        .requestMatchers(
                                 HttpMethod.PATCH,
                                 "/v1/solicitudes/*/estado"
                         )
