@@ -70,7 +70,7 @@ public class GlobalExceptionHandler {
 
         String mensaje = ex.getBindingResult()
                 .getFieldErrors()
-                .getFirst()
+                .get(0)
                 .getDefaultMessage();
 
         ErrorResponse error = new ErrorResponse(
