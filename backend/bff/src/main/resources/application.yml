@@ -15,7 +15,7 @@ spring:
 
 services:
   solicitudes:
-    base-url: http://localhost:8081
+    base-url: ${SOLICITUDES_URL:http://localhost:8081}
 
   catalogo:
-    base-url: http://localhost:8082
+    base-url: ${CATALOGO_URL:http://localhost:8082}
