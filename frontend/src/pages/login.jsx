@@ -1,16 +1,8 @@
 import { useState } from "react";
-import {
-  useMsal,
-  useIsAuthenticated,
-} from "@azure/msal-react";
-
-import {
-  InteractionStatus,
-  InteractionRequiredAuthError,
-} from "@azure/msal-browser";
-
+import {useMsal, useIsAuthenticated,} from "@azure/msal-react";
+import {InteractionStatus, InteractionRequiredAuthError,} from "@azure/msal-browser";
+import { useNavigate } from "react-router-dom";
 import { loginRequest } from "../auth/msalConfig";
-
 import "./login.css";
 
 
@@ -24,7 +16,7 @@ function Login() {
 
   const isAuthenticated = useIsAuthenticated();
 
-
+  const navigate = useNavigate();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [tokenObtained, setTokenObtained] = useState(false);
@@ -191,6 +183,7 @@ function Login() {
       console.log(
         "Usuario autenticado correctamente."
       );
+    navigate("/home");
 
 
     } catch (error) {
