@@ -1,0 +1,174 @@
+.nueva-solicitud-page {
+  min-height: 100vh;
+  background: #f4f7fb;
+  color: #1f2937;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.form-content {
+  max-width: 800px;
+  margin: 0 auto;
+
+  padding: 40px 30px;
+}
+
+.form-content h2 {
+  margin-bottom: 8px;
+  font-size: 28px;
+}
+
+.form-content > p {
+  color: #6b7280;
+  margin-bottom: 30px;
+}
+
+.solicitud-form {
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+
+  padding: 30px;
+
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+
+  margin-bottom: 22px;
+}
+
+.form-group label {
+  margin-bottom: 8px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  color: #374151;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+
+  padding: 12px;
+
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+
+  font-size: 14px;
+
+  font-family: inherit;
+
+  outline: none;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: #2563eb;
+}
+
+.form-group textarea {
+  resize: vertical;
+}
+
+.submit-button {
+  width: 100%;
+
+  border: none;
+  border-radius: 7px;
+
+  padding: 12px;
+
+  background: #2563eb;
+  color: #ffffff;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.submit-button:hover {
+  background: #1d4ed8;
+}
+.back-button {
+  border: none;
+  background: transparent;
+  color: #2563eb;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 0;
+  margin-bottom: 15px;
+  transition: 0.2s ease;
+}
+
+.back-button:hover {
+  color: #1d4ed8;
+  transform: translateX(-3px);
+}
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+
+  background: #ffffff;
+  color: #334155;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+
+  padding: 9px 15px;
+  margin-bottom: 20px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.back-button:hover {
+  background: #f8fafc;
+  color: #2563eb;
+  border-color: #bfdbfe;
+
+  transform: translateX(-3px);
+
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.10);
+}
+
+.back-button:active {
+  transform: translateX(-1px);
+}
+
+.back-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 25px;
+  height: 25px;
+
+  border-radius: 50%;
+  background: #eff6ff;
+
+  color: #2563eb;
+
+  font-size: 17px;
+  line-height: 1;
+}

@@ -253,6 +253,7 @@ function Login() {
           </p>
 
         </div>
+        
 
 
         {/* 
@@ -407,7 +408,7 @@ function Login() {
 
         <footer className="developer-signature">
 
-          Desarrollado por Alexis Poblete, Damian Iturra y Francisco Vásquez | Sistema creado para la asignatura de Desarrollo Cloud Native 2026
+          Desarrollado por Alexis Poblete, Damian Villanueva y Francisco Vásquez | Sistema creado para la asignatura de Desarrollo Cloud Native 2026
 
         </footer>
 
