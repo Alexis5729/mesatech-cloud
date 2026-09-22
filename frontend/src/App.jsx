@@ -1,9 +1,4 @@
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
+import {BrowserRouter, Routes, Route, Navigate,} from "react-router-dom";
 
 import { useIsAuthenticated } from "@azure/msal-react";
 
@@ -25,23 +20,16 @@ function ProtectedRoute({ children }) {
 
 
 function App() {
-
   return (
-
     <BrowserRouter>
-
       <Routes>
-
         {/* LOGIN */}
-
         <Route
           path="/"
           element={<Login />}
         />
 
-
         {/* HOME PROTEGIDO */}
-
         <Route
           path="/home"
           element={
