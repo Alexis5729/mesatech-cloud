@@ -1,5 +1,6 @@
 import { useMsal } from "@azure/msal-react";
 import { useNavigate } from "react-router-dom";
+import { useUserRoles } from "../hooks/useUserRoles";
 import "./Home.css";
 import {
   ClipboardList,
@@ -15,16 +16,23 @@ import { useState } from "react";
 
 function Home() {
     const [showProfileMenu, setShowProfileMenu] = useState(false);
-const { instance, accounts } = useMsal();
-  const navigate = useNavigate();
+    const { instance, accounts } = useMsal();
+    const navigate = useNavigate();
 
-  const account = accounts[0];
-const handleLogout = () => {
-  instance.logoutRedirect({
-    account: account,
-    postLogoutRedirectUri: "/"
-  });
-};
+    const account = accounts[0];
+
+    const {
+      esCliente,
+      esOperador,
+      esAdministrador,
+    } = useUserRoles();
+
+    const handleLogout = () => {
+        instance.logoutRedirect({
+        account: account,
+        postLogoutRedirectUri: "/"
+        });
+    };
   const nombre =
     account?.name || "Usuario";
 
@@ -166,36 +174,59 @@ const handleLogout = () => {
 
             {/* MIS SOLICITUDES */}
 
-            <button
-              className="action-card"
-              onClick={() =>
-                navigate("/solicitudes")
-              }
-            >
-
-              <div className="action-icon blue">
+            {esCliente && (
+              <button
+                className="action-card"
+                onClick={() =>
+                  navigate("/solicitudes")
+                }
+              >
+                <div className="action-icon blue">
                   <ClipboardList size={24} strokeWidth={1.8} />
+                </div>
 
-              </div>
+                <div className="action-text">
+                  <h4>
+                    Mis solicitudes
+                  </h4>
 
-              <div className="action-text">
+                  <p>
+                    Consulta el estado de tus solicitudes de soporte.
+                  </p>
+                </div>
 
-                <h4>
-                  Mis solicitudes
-                </h4>
+                <span className="action-arrow">
+                  →
+                </span>
+              </button>
+            )}
 
-                <p>
-                  Consulta el estado de tus
-                  solicitudes de soporte.
-                </p>
+            {(esOperador || esAdministrador) && (
+              <button
+                className="action-card"
+                onClick={() =>
+                  navigate("/solicitudes")
+                }
+              >
+                <div className="action-icon blue">
+                  <ClipboardList size={24} strokeWidth={1.8} />
+                </div>
 
-              </div>
+                <div className="action-text">
+                  <h4>
+                    Gestionar solicitudes
+                  </h4>
 
-              <span className="action-arrow">
-                →
-              </span>
+                  <p>
+                    Consulta y gestiona las solicitudes de soporte.
+                  </p>
+                </div>
 
-            </button>
+                <span className="action-arrow">
+                  →
+                </span>
+              </button>
+            )}
 
 
             {/* NUEVA SOLICITUD */}

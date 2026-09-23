@@ -13,8 +13,8 @@ function NuevaSolicitud() {
   const [formulario, setFormulario] = useState({
     titulo: "",
     descripcion: "",
-    categoria: "",
-    prioridad: "MEDIA",
+    categoriaId: "",
+    prioridadId: "2",
   });
 
   const [loading, setLoading] = useState(false);
@@ -46,7 +46,7 @@ function NuevaSolicitud() {
       return;
     }
 
-    if (!formulario.categoria) {
+    if (!formulario.categoriaId) {
       setError("Debes seleccionar una categoría.");
       return;
     }
@@ -233,33 +233,20 @@ function NuevaSolicitud() {
                 </label>
 
                 <select
-                  id="categoria"
-                  name="categoria"
-                  value={formulario.categoria}
+                  id="categoriaId"
+                  name="categoriaId"
+                  value={formulario.categoriaId}
                   onChange={handleChange}
                   disabled={loading}
                 >
-
                   <option value="">
                     Selecciona una categoría
                   </option>
 
-                  <option value="HARDWARE">
-                    Hardware
-                  </option>
-
-                  <option value="SOFTWARE">
-                    Software
-                  </option>
-
-                  <option value="REDES">
-                    Redes
-                  </option>
-
-                  <option value="ACCESOS">
-                    Accesos
-                  </option>
-
+                  <option value="1">Hardware</option>
+                  <option value="2">Software</option>
+                  <option value="3">Accesos</option>
+                  <option value="4">Conectividad</option>
                 </select>
 
               </div>
@@ -274,25 +261,16 @@ function NuevaSolicitud() {
                 </label>
 
                 <select
-                  id="prioridad"
-                  name="prioridad"
-                  value={formulario.prioridad}
+                  id="prioridadId"
+                  name="prioridadId"
+                  value={formulario.prioridadId}
                   onChange={handleChange}
                   disabled={loading}
                 >
-
-                  <option value="BAJA">
-                    Baja
-                  </option>
-
-                  <option value="MEDIA">
-                    Media
-                  </option>
-
-                  <option value="ALTA">
-                    Alta
-                  </option>
-
+                  <option value="1">Baja</option>
+                  <option value="2">Media</option>
+                  <option value="3">Alta</option>
+                  <option value="4">Crítica</option>
                 </select>
 
               </div>

@@ -20,7 +20,7 @@ function Catalogo() {
         setLoading(true);
         setError("");
 
-        const data = await apiGet("/v1/catalogo");
+        const data = await apiGet("/v1/catalogo/categorias");
 
         console.log("Respuesta catálogo:", data);
 

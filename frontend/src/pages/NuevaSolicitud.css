@@ -1,138 +1,126 @@
+/* ==========================================================================
+   1. ESTRUCTURA GLOBAL Y PÁGINA
+   ========================================================================== */
 .nueva-solicitud-page {
   min-height: 100vh;
-  background: #f4f7fb;
-  color: #1f2937;
-  font-family: Arial, Helvetica, sans-serif;
+  background: #f5f7fb;
+  color: #1e293b;
 }
 
-.form-content {
-  max-width: 800px;
+.nueva-solicitud-content {
+  width: min(900px, calc(100% - 80px));
   margin: 0 auto;
-
-  padding: 40px 30px;
+  padding: 35px 0 60px;
 }
 
-.form-content h2 {
-  margin-bottom: 8px;
-  font-size: 28px;
-}
-
-.form-content > p {
-  color: #6b7280;
-  margin-bottom: 30px;
-}
-
-.solicitud-form {
-  background: #ffffff;
-
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-
-  padding: 30px;
-
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.04);
-}
-
-.form-group {
+/* ==========================================================================
+   2. HEADER & NAVEGACIÓN
+   ========================================================================== */
+.page-header {
   display: flex;
-  flex-direction: column;
-
-  margin-bottom: 22px;
+  align-items: center;
+  justify-content: space-between;
+  height: 76px;
+  padding: 0 48px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
 }
 
-.form-group label {
-  margin-bottom: 8px;
-
-  font-size: 14px;
-  font-weight: 600;
-
-  color: #374151;
+.page-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.form-group input,
-.form-group textarea,
-.form-group select {
-  width: 100%;
-
-  padding: 12px;
-
-  border: 1px solid #d1d5db;
-  border-radius: 7px;
-
-  font-size: 14px;
-
-  font-family: inherit;
-
-  outline: none;
-}
-
-.form-group input:focus,
-.form-group textarea:focus,
-.form-group select:focus {
-  border-color: #2563eb;
-}
-
-.form-group textarea {
-  resize: vertical;
-}
-
-.submit-button {
-  width: 100%;
-
-  border: none;
-  border-radius: 7px;
-
-  padding: 12px;
-
+.page-brand-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
   background: #2563eb;
-  color: #ffffff;
+  color: white;
+  font-size: 20px;
+  font-weight: 700;
+  border-radius: 10px;
+}
 
-  font-size: 15px;
+.page-brand h1 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 20px;
+}
+
+.page-brand span {
+  display: block;
+  margin-top: 2px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.page-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
   font-weight: 600;
-
-  cursor: pointer;
 }
 
-.submit-button:hover {
-  background: #1d4ed8;
-}
-.back-button {
-  border: none;
-  background: transparent;
+.page-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #dbeafe;
   color: #2563eb;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 8px 0;
-  margin-bottom: 15px;
-  transition: 0.2s ease;
+  border-radius: 50%;
 }
 
-.back-button:hover {
-  color: #1d4ed8;
-  transform: translateX(-3px);
+/* ==========================================================================
+   3. ENCABEZADO DE PÁGINA & BOTÓN VOLVER
+   ========================================================================== */
+.page-title {
+  margin-top: 25px;
 }
+
+.page-title > span {
+  color: #2563eb;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.page-title h2 {
+  margin: 8px 0 6px;
+  color: #0f172a;
+  font-size: 30px;
+}
+
+.page-title p {
+  margin: 0;
+  color: #64748b;
+}
+
 .back-button {
   display: inline-flex;
   align-items: center;
   gap: 9px;
 
+  padding: 9px 15px;
+
   background: #ffffff;
   color: #334155;
-
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-
-  padding: 9px 15px;
-  margin-bottom: 20px;
 
   font-size: 14px;
   font-weight: 600;
 
-  cursor: pointer;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
 
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+
+  cursor: pointer;
 
   transition:
     background 0.2s ease,
@@ -146,10 +134,8 @@
   background: #f8fafc;
   color: #2563eb;
   border-color: #bfdbfe;
-
-  transform: translateX(-3px);
-
   box-shadow: 0 4px 10px rgba(37, 99, 235, 0.10);
+  transform: translateX(-3px);
 }
 
 .back-button:active {
@@ -160,15 +146,192 @@
   display: flex;
   align-items: center;
   justify-content: center;
-
   width: 25px;
   height: 25px;
-
-  border-radius: 50%;
   background: #eff6ff;
-
   color: #2563eb;
-
   font-size: 17px;
   line-height: 1;
+  border-radius: 50%;
+}
+
+/* ==========================================================================
+   4. COMPONENTES DEL FORMULARIO
+   ========================================================================== */
+.form-card {
+  margin-top: 30px;
+  padding: 32px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(15, 23, 42, 0.04);
+}
+
+.form-section {
+  padding-bottom: 25px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.form-section h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 18px;
+}
+
+.form-section p {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-top: 22px;
+}
+
+.form-group label {
+  margin-bottom: 8px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 12px 14px;
+  background: #ffffff;
+  color: #0f172a;
+  font-family: inherit;
+  font-size: 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-group textarea {
+  resize: vertical;
+}
+
+/* Mensajes de feedback */
+.form-message {
+  margin-top: 22px;
+  padding: 12px 15px;
+  font-size: 13px;
+  border-radius: 8px;
+}
+
+.form-message.error {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.form-message.success {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+/* ==========================================================================
+   5. BOTONES Y ACCIONES
+   ========================================================================== */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 30px;
+  padding-top: 25px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.primary-button,
+.secondary-button {
+  padding: 11px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.primary-button {
+  background: #2563eb;
+  color: white;
+  border: none;
+}
+
+.primary-button:hover {
+  background: #1d4ed8;
+}
+
+.secondary-button {
+  background: white;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+.secondary-button:hover {
+  background: #f8fafc;
+}
+
+/* Estados Globales Deshabilitados */
+.primary-button:disabled,
+.secondary-button:disabled,
+.form-group input:disabled,
+.form-group textarea:disabled,
+.form-group select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ==========================================================================
+   6. RESPONSIVE DESIGN (MEDIA QUERIES)
+   ========================================================================== */
+@media (max-width: 700px) {
+  .page-header {
+    padding: 0 20px;
+  }
+
+  .page-user > span {
+    display: none;
+  }
+
+  .nueva-solicitud-content {
+    width: calc(100% - 30px);
+  }
+
+  .form-card {
+    padding: 22px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .primary-button,
+  .secondary-button {
+    width: 100%;
+  }
 }

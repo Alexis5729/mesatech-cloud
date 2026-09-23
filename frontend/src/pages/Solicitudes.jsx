@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useMsal } from "@azure/msal-react";
 import { useNavigate } from "react-router-dom";
 import { apiGet } from "../services/api";
+import { useUserRoles } from "../hooks/useUserRoles";
 import "./Solicitudes.css";
 
 function Solicitudes() {
@@ -10,9 +11,21 @@ function Solicitudes() {
 
   const account = accounts[0];
 
+  const {
+    esCliente,
+    loadingRoles,
+  } = useUserRoles();
+
   const [solicitudes, setSolicitudes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const prioridades = {
+    1: "Baja",
+    2: "Media",
+    3: "Alta",
+    4: "Crítica",
+  };
 
   useEffect(() => {
     const cargarSolicitudes = async () => {
@@ -20,9 +33,11 @@ function Solicitudes() {
         setLoading(true);
         setError("");
 
-        const data = await apiGet(
-          "/v1/solicitudes/mias"
-        );
+        const endpoint = esCliente
+          ? "/v1/solicitudes/mias"
+          : "/v1/solicitudes";
+
+        const data = await apiGet(endpoint);
 
         setSolicitudes(
           Array.isArray(data)
@@ -45,8 +60,13 @@ function Solicitudes() {
       }
     };
 
+    if (loadingRoles) {
+      return;
+    }
+
     cargarSolicitudes();
-  }, []);
+
+  }, [esCliente, loadingRoles]);
 
   return (
     <div className="solicitudes-page">
@@ -97,12 +117,15 @@ function Solicitudes() {
           </span>
 
           <h2>
-            Mis solicitudes
+            {esCliente
+              ? "Mis solicitudes"
+              : "Gestionar solicitudes"}
           </h2>
 
           <p>
-            Consulta y realiza seguimiento
-            de tus solicitudes de soporte.
+            {esCliente
+              ? "Consulta y realiza seguimiento de tus solicitudes de soporte."
+              : "Consulta y gestiona las solicitudes de soporte registradas."}
           </p>
 
         </section>
@@ -216,15 +239,13 @@ function Solicitudes() {
                       </td>
 
                       <td>
-                        {solicitud.prioridad ||
-                          solicitud.priority ||
-                          "—"}
+                        {prioridades[solicitud.prioridadId] || "—"}
                       </td>
 
                       <td>
-                        {solicitud.fechaCreacion ||
-                          solicitud.createdAt ||
-                          "—"}
+                        {solicitud.fechaCreacion
+                          ? new Date(solicitud.fechaCreacion).toLocaleString("es-CL")
+                          : "—"}
                       </td>
 
                     </tr>
