@@ -7,7 +7,7 @@ import {
 // URL DEL BFF
 // =====================================================
 
-const API_URL = "http://localhost:8080";
+const API_URL = "https://72o5rmojwg9.execute-api.us-east-1.amazonaws.com";
 
 
 // =====================================================
