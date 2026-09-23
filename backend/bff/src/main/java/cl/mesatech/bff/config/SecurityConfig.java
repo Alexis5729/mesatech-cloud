@@ -27,7 +27,8 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
 
-                        .requestMatchers("/health")
+                        .requestMatchers("/health",
+                                "/error")
                         .permitAll()
 
                         .requestMatchers(
