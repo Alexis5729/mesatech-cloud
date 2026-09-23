@@ -70,7 +70,7 @@ public class SecurityConfig {
 
                         .requestMatchers(
                                 HttpMethod.PATCH,
-                                "/v1/solicitudes/*/estado"
+                                "/v1/solicitudes/{id}/estado"
                         )
                         .hasAnyRole(
                                 "OPERADOR",

@@ -7,7 +7,7 @@ import {
 // URL DEL BFF
 // =====================================================
 
-const API_URL = "https://72q5moiwq9.execute-api.us-east-1.amazonaws.com";
+const API_URL = import.meta.env.VITE_API_URL;
 
 
 // =====================================================

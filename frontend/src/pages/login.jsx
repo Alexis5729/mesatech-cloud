@@ -39,9 +39,15 @@ function Login() {
 
       console.log("Access Token obtenido correctamente");
 
+      console.log(
+        "Access Token temporal:",
+        tokenResponse.accessToken
+      );
+
       setTokenObtained(true);
 
       return tokenResponse.accessToken;
+
 
     } catch (error) {
 
@@ -134,32 +140,8 @@ function Login() {
         response.account
       );
 
-
-      console.log(
-        "================================"
-      );
-
       console.log(
         "LOGIN EXITOSO"
-      );
-
-      console.log(
-        "Nombre:",
-        response.account.name
-      );
-
-      console.log(
-        "Correo:",
-        response.account.username
-      );
-
-      console.log(
-        "Claims:",
-        response.account.idTokenClaims
-      );
-
-      console.log(
-        "================================"
       );
 
 
