@@ -1,13 +1,30 @@
 import { useMsal } from "@azure/msal-react";
 import { useNavigate } from "react-router-dom";
 import "./Home.css";
+import {
+  ClipboardList,
+  PlusCircle,
+  BookOpen,
+  Monitor,
+  MonitorCog,
+  Network,
+  KeyRound,
+  LogOut
+} from "lucide-react";
+import { useState } from "react";
 
 function Home() {
-  const { accounts } = useMsal();
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
+const { instance, accounts } = useMsal();
   const navigate = useNavigate();
 
   const account = accounts[0];
-
+const handleLogout = () => {
+  instance.logoutRedirect({
+    account: account,
+    postLogoutRedirectUri: "/"
+  });
+};
   const nombre =
     account?.name || "Usuario";
 
@@ -36,26 +53,70 @@ function Home() {
       
 
 
-        <div className="user-area">
+       <div className="profile-container">
 
-          <div className="user-info">
+         <button
+           className="user-area"
+           onClick={() =>
+             setShowProfileMenu(!showProfileMenu)
+           }
+         >
 
-            <strong>
-              {nombre}
-            </strong>
+           <div className="user-info">
 
-            <span>
-              {correo}
-            </span>
-            </div>
-            
-            
+             <strong>
+               {nombre}
+             </strong>
 
-          <div className="user-avatar">
-            {nombre.charAt(0).toUpperCase()}
-          </div>
+             <span>
+               {correo}
+             </span>
 
-        </div>
+           </div>
+
+           <div className="user-avatar">
+             {nombre.charAt(0).toUpperCase()}
+           </div>
+
+         </button>
+
+
+         {showProfileMenu && (
+
+           <div className="profile-menu">
+
+             <div className="profile-menu-info">
+
+               <strong>
+                 {nombre}
+               </strong>
+
+               <span>
+                 {correo}
+               </span>
+
+             </div>
+
+
+             <div className="profile-menu-divider"></div>
+
+
+         <button
+           className="logout-button"
+           onClick={handleLogout}
+         >
+           <LogOut size={18} />
+
+           <span>
+             Cerrar sesión
+           </span>
+         </button>
+
+           </div>
+
+         )}
+
+       </div>
 
       </header>
 
@@ -113,7 +174,8 @@ function Home() {
             >
 
               <div className="action-icon blue">
-                
+                  <ClipboardList size={24} strokeWidth={1.8} />
+
               </div>
 
               <div className="action-text">
@@ -146,6 +208,7 @@ function Home() {
             >
 
               <div className="action-icon green">
+                   <PlusCircle size={24} strokeWidth={1.8} />
                 
               </div>
 
@@ -179,6 +242,7 @@ function Home() {
             >
 
               <div className="action-icon purple">
+                    <BookOpen size={24} strokeWidth={1.8} />
                 
               </div>
 
@@ -244,6 +308,7 @@ function Home() {
             <div className="category-card">
 
               <div className="category-icon">
+                   <Monitor size={26} strokeWidth={1.7} />
                 
               </div>
 
@@ -263,6 +328,7 @@ function Home() {
             <div className="category-card">
 
               <div className="category-icon">
+                    <MonitorCog size={26} strokeWidth={1.7} />
                 
               </div>
 
@@ -282,6 +348,7 @@ function Home() {
             <div className="category-card">
 
               <div className="category-icon">
+                   <Network size={26} strokeWidth={1.7} />
                 
               </div>
 
@@ -301,6 +368,8 @@ function Home() {
             <div className="category-card">
 
               <div className="category-icon">
+                    <KeyRound size={26} strokeWidth={1.7} />
+
                 
               </div>
 
