@@ -149,6 +149,16 @@ function Home() {
               Hola, {nombre.split(" ")[0]} 
             </h2>
 
+            <p className="user-role">
+              Rol: {esAdministrador
+                ? "Administrador"
+                : esOperador
+                  ? "Operador"
+                  : esCliente
+                    ? "Cliente"
+                    : "Usuario"}
+            </p>
+
             <p>
               Gestiona tus solicitudes de soporte
               de manera rápida y sencilla.
