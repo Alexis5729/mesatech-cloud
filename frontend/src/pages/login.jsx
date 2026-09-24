@@ -37,17 +37,10 @@ function Login() {
           account: userAccount,
         });
 
-      console.log("Access Token obtenido correctamente");
-
-      console.log(
-        "Access Token temporal:",
-        tokenResponse.accessToken
-      );
 
       setTokenObtained(true);
 
       return tokenResponse.accessToken;
-
 
     } catch (error) {
 
@@ -66,9 +59,6 @@ function Login() {
               loginRequest
             );
 
-          console.log(
-            "Access Token obtenido mediante popup"
-          );
 
           setTokenObtained(true);
 
@@ -140,10 +130,6 @@ function Login() {
         response.account
       );
 
-      console.log(
-        "LOGIN EXITOSO"
-      );
-
 
       // Obtener Access Token
       const token =
@@ -161,10 +147,6 @@ function Login() {
         return;
       }
 
-
-      console.log(
-        "Usuario autenticado correctamente."
-      );
     navigate("/home");
 
 
