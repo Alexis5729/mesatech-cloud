@@ -39,11 +39,6 @@ export function useUserRoles() {
           response.accessToken
         );
 
-        console.log(
-          "Roles Access Token:",
-          claims.roles
-        );
-
         setRoles(claims.roles || []);
 
       } catch (error) {
