@@ -61,7 +61,7 @@ function Catalogo() {
 
   const [nuevaPrioridad, setNuevaPrioridad] = useState({
     nombre: "",
-    descripcion: "",
+    nivel: "",
   });
 
   const [prioridadEditando, setPrioridadEditando] = useState(null);
@@ -311,6 +311,15 @@ function Catalogo() {
       return;
     }
 
+    const nivel = Number(nuevaPrioridad.nivel);
+
+    if (!Number.isInteger(nivel) || nivel <= 0) {
+      setError(
+        "El nivel de la prioridad debe ser un número entero positivo."
+      );
+      return;
+    }
+
     try {
       setError("");
 
@@ -318,8 +327,7 @@ function Catalogo() {
         "/v1/catalogo/prioridades",
         {
           nombre: nuevaPrioridad.nombre.trim(),
-          descripcion:
-            nuevaPrioridad.descripcion.trim(),
+          nivel,
         }
       );
 
@@ -335,7 +343,7 @@ function Catalogo() {
 
       setNuevaPrioridad({
         nombre: "",
-        descripcion: "",
+        nivel: "",
       });
     } catch (error) {
       console.error(
@@ -347,6 +355,124 @@ function Catalogo() {
         error.message ||
           "No fue posible crear la prioridad."
       );
+    }
+  };
+
+  // =========================
+  // ACTUALIZAR PRIORIDAD
+  // =========================
+
+  const actualizarPrioridad = async () => {
+    if (!prioridadEditando) {
+      return;
+    }
+
+    if (!nuevaPrioridad.nombre.trim()) {
+      setError(
+        "El nombre de la prioridad es obligatorio."
+      );
+      return;
+    }
+
+    const nivel = Number(nuevaPrioridad.nivel);
+
+    if (!Number.isInteger(nivel) || nivel <= 0) {
+      setError(
+        "El nivel de la prioridad debe ser un número entero positivo."
+      );
+      return;
+    }
+
+    try {
+      setError("");
+
+      await apiPut(
+        `/v1/catalogo/prioridades/${prioridadEditando.id}`,
+        {
+          nombre: nuevaPrioridad.nombre.trim(),
+          nivel,
+        }
+      );
+
+      const data = await apiGet(
+        "/v1/catalogo/prioridades"
+      );
+
+      setPrioridades(
+        Array.isArray(data)
+          ? data
+          : data.content || data.items || []
+      );
+
+      setNuevaPrioridad({
+        nombre: "",
+        nivel: "",
+      });
+
+      setPrioridadEditando(null);
+    } catch (error) {
+      console.error(
+        "Error actualizando prioridad:",
+        error
+      );
+
+      setError(
+        error.message ||
+          "No fue posible actualizar la prioridad."
+      );
+    }
+  };
+
+  // =========================
+  // ELIMINAR PRIORIDAD
+  // =========================
+
+  const eliminarPrioridad = async (id) => {
+    const confirmar = window.confirm(
+      "¿Estás seguro de que deseas eliminar esta prioridad?"
+    );
+
+    if (!confirmar) {
+      return;
+    }
+
+    try {
+      setError("");
+      setEliminandoId(id);
+
+      await apiDelete(
+        `/v1/catalogo/prioridades/${id}`
+      );
+
+      const data = await apiGet(
+        "/v1/catalogo/prioridades"
+      );
+
+      setPrioridades(
+        Array.isArray(data)
+          ? data
+          : data.content || data.items || []
+      );
+
+      if (prioridadEditando?.id === id) {
+        setPrioridadEditando(null);
+        setNuevaPrioridad({
+          nombre: "",
+          nivel: "",
+        });
+      }
+    } catch (error) {
+      console.error(
+        "Error eliminando prioridad:",
+        error
+      );
+
+      setError(
+        error.message ||
+          "No fue posible eliminar la prioridad."
+      );
+    } finally {
+      setEliminandoId(null);
     }
   };
 
@@ -620,7 +746,7 @@ function Catalogo() {
 
                     setNuevaPrioridad({
                       nombre: "",
-                      descripcion: "",
+                      nivel: "",
                     });
                   }}
                 >
@@ -629,10 +755,9 @@ function Catalogo() {
 
               </div>
 
-              {/* FORMULARIO NUEVA PRIORIDAD */}
+              {/* FORMULARIO PARA CREAR O EDITAR UNA PRIORIDAD */}
 
-              {modoAdministracion &&
-                prioridadEditando === null && (
+              {modoAdministracion && (
                   <div className="priority-form">
 
                     <div className="form-group">
@@ -663,26 +788,28 @@ function Catalogo() {
 
                     <div className="form-group">
 
-                      <label htmlFor="descripcionPrioridad">
-                        Descripción
+                      <label htmlFor="nivelPrioridad">
+                        Nivel
                       </label>
 
-                      <textarea
-                        id="descripcionPrioridad"
+                      <input
+                        id="nivelPrioridad"
+                        type="number"
+                        min="1"
+                        step="1"
                         value={
-                          nuevaPrioridad.descripcion
+                          nuevaPrioridad.nivel
                         }
                         onChange={(e) =>
                           setNuevaPrioridad(
                             (prev) => ({
                               ...prev,
-                              descripcion:
+                              nivel:
                                 e.target.value,
                             })
                           )
                         }
-                        placeholder="Describe esta prioridad..."
-                        rows="3"
+                        placeholder="Ej: 1"
                       />
 
                     </div>
@@ -691,10 +818,14 @@ function Catalogo() {
                       type="button"
                       className="primary-button"
                       onClick={
-                        crearPrioridad
+                        prioridadEditando
+                          ? actualizarPrioridad
+                          : crearPrioridad
                       }
                     >
-                      Crear prioridad
+                      {prioridadEditando
+                        ? "Guardar cambios"
+                        : "Crear prioridad"}
                     </button>
 
                   </div>
@@ -729,9 +860,7 @@ function Catalogo() {
                           </h4>
 
                           <p>
-                            {prioridad.descripcion ||
-                              prioridad.description ||
-                              "Sin descripción"}
+                            Nivel: {prioridad.nivel}
                           </p>
 
                         </div>
@@ -751,14 +880,30 @@ function Catalogo() {
                                   prioridad.nombre ||
                                   prioridad.name ||
                                   "",
-                                descripcion:
-                                  prioridad.descripcion ||
-                                  prioridad.description ||
+                                nivel:
+                                  prioridad.nivel ||
                                   "",
                               });
                             }}
                           >
                             Editar
+                          </button>
+
+                          <button
+                            type="button"
+                            className="delete-category-button"
+                            onClick={() =>
+                              eliminarPrioridad(
+                                prioridad.id
+                              )
+                            }
+                            disabled={
+                              eliminandoId === prioridad.id
+                            }
+                          >
+                            {eliminandoId === prioridad.id
+                              ? "Eliminando..."
+                              : "Eliminar"}
                           </button>
 
                         </div>

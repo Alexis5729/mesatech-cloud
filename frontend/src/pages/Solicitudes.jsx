@@ -382,9 +382,6 @@ const [estadoSeleccionado, setEstadoSeleccionado] = useState({});
 
     </div>
   );
-  {
-  
-}
 }
 
 export default Solicitudes;
