@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useMsal } from "@azure/msal-react";
 import { useNavigate } from "react-router-dom";
-import { apiGet } from "../services/api";
+import {apiGet,apiPatch,} from "../services/api";
 import { useUserRoles } from "../hooks/useUserRoles";
 import "./Solicitudes.css";
 
@@ -11,14 +11,19 @@ function Solicitudes() {
 
   const account = accounts[0];
 
-  const {
-    esCliente,
-    loadingRoles,
-  } = useUserRoles();
+const {
+  esCliente,
+  esOperador,
+  esAdministrador,
+  loadingRoles,
+} = useUserRoles();
 
   const [solicitudes, setSolicitudes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  
+  const [actualizandoId, setActualizandoId] = useState(null);
+const [estadoSeleccionado, setEstadoSeleccionado] = useState({});
 
   const prioridades = {
     1: "Baja",
@@ -26,6 +31,14 @@ function Solicitudes() {
     3: "Alta",
     4: "Crítica",
   };
+  const estados = [
+  "CREADA",
+  "ASIGNADA",
+  "EN_PROCESO",
+  "RESUELTA",
+  "CERRADA",
+  "CANCELADA",
+];
 
   useEffect(() => {
     const cargarSolicitudes = async () => {
@@ -67,6 +80,56 @@ function Solicitudes() {
     cargarSolicitudes();
 
   }, [esCliente, loadingRoles]);
+  const cambiarEstado = async (id) => {
+  const nuevoEstado = estadoSeleccionado[id];
+
+  if (!nuevoEstado) {
+    return;
+  }
+
+  try {
+    setActualizandoId(id);
+    setError("");
+
+    await apiPatch(
+      `/v1/solicitudes/${id}/estado`,
+      {
+        estado: nuevoEstado,
+      }
+    );
+
+    const endpoint = esCliente
+      ? "/v1/solicitudes/mias"
+      : "/v1/solicitudes";
+
+    const data = await apiGet(endpoint);
+
+    setSolicitudes(
+      Array.isArray(data)
+        ? data
+        : data.content || []
+    );
+
+    setEstadoSeleccionado((prev) => ({
+      ...prev,
+      [id]: "",
+    }));
+
+  } catch (error) {
+    console.error(
+      "Error actualizando estado:",
+      error
+    );
+
+    setError(
+      error.message ||
+      "No fue posible actualizar el estado."
+    );
+
+  } finally {
+    setActualizandoId(null);
+  }
+};
 
   return (
     <div className="solicitudes-page">
@@ -196,15 +259,19 @@ function Solicitudes() {
 
               <table>
 
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Solicitud</th>
-                    <th>Estado</th>
-                    <th>Prioridad</th>
-                    <th>Fecha</th>
-                  </tr>
-                </thead>
+             <thead>
+  <tr>
+    <th>ID</th>
+    <th>Solicitud</th>
+    <th>Estado</th>
+    <th>Prioridad</th>
+    <th>Fecha</th>
+
+    {(esOperador || esAdministrador) && (
+      <th>Acciones</th>
+    )}
+  </tr>
+</thead>
 
                 <tbody>
 
@@ -247,6 +314,51 @@ function Solicitudes() {
                           ? new Date(solicitud.fechaCreacion).toLocaleString("es-CL")
                           : "—"}
                       </td>
+                      {(esOperador || esAdministrador) && (
+  <td className="actions-cell">
+
+    <select
+      value={estadoSeleccionado[solicitud.id] || ""}
+      onChange={(e) =>
+        setEstadoSeleccionado((prev) => ({
+          ...prev,
+          [solicitud.id]: e.target.value,
+        }))
+      }
+      disabled={actualizandoId === solicitud.id}
+    >
+      <option value="">
+        Seleccionar estado
+      </option>
+
+      {estados.map((estado) => (
+        <option
+          key={estado}
+          value={estado}
+        >
+          {estado}
+        </option>
+      ))}
+    </select>
+
+    <button
+      type="button"
+      className="update-status-button"
+      onClick={() =>
+        cambiarEstado(solicitud.id)
+      }
+      disabled={
+        !estadoSeleccionado[solicitud.id] ||
+        actualizandoId === solicitud.id
+      }
+    >
+      {actualizandoId === solicitud.id
+        ? "Actualizando..."
+        : "Actualizar"}
+    </button>
+
+  </td>
+)}
 
                     </tr>
 
@@ -270,6 +382,9 @@ function Solicitudes() {
 
     </div>
   );
+  {
+  
+}
 }
 
 export default Solicitudes;

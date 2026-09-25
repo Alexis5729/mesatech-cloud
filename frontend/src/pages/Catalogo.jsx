@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useMsal } from "@azure/msal-react";
 import { useNavigate } from "react-router-dom";
-import { apiGet } from "../services/api";
+import { apiGet, apiPost, apiPut, apiDelete } from "../services/api";
+import { useUserRoles } from "../hooks/useUserRoles";
 import "./Catalogo.css";
 
 function Catalogo() {
@@ -9,11 +10,30 @@ function Catalogo() {
   const navigate = useNavigate();
 
   const account = accounts[0];
+  const {
+  esAdministrador,
+  loadingRoles,
+} = useUserRoles();
 
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [prioridades, setPrioridades] = useState([]);
+const [loadingPrioridades, setLoadingPrioridades] = useState(true);
+const [modoAdministracion, setModoAdministracion] = useState(false);
+const [mostrarFormulario, setMostrarFormulario] = useState(false);
+const [nuevaCategoria, setNuevaCategoria] = useState({
+  nombre: "",
+  descripcion: "",
+});
+const [nuevaPrioridad, setNuevaPrioridad] = useState({
+  nombre: "",
+  descripcion: "",
+});
+const [prioridadEditando, setPrioridadEditando] = useState(null);
 
+const [categoriaEditando, setCategoriaEditando] = useState(null);
+const [eliminandoId, setEliminandoId] = useState(null);
   useEffect(() => {
     const cargarCatalogo = async () => {
       try {
@@ -47,6 +67,186 @@ function Catalogo() {
 
     cargarCatalogo();
   }, []);
+  useEffect(() => {
+  const cargarPrioridades = async () => {
+    try {
+      setLoadingPrioridades(true);
+
+      const data = await apiGet(
+        "/v1/catalogo/prioridades"
+      );
+
+      setPrioridades(
+        Array.isArray(data)
+          ? data
+          : data.content || data.items || []
+      );
+
+    } catch (error) {
+      console.error(
+        "Error cargando prioridades:",
+        error
+      );
+
+      setError(
+        "No fue posible cargar las prioridades."
+      );
+
+    } finally {
+      setLoadingPrioridades(false);
+    }
+  };
+
+  cargarPrioridades();
+}, []);
+  const crearCategoria = async () => {
+  if (!nuevaCategoria.nombre.trim()) {
+    setError("El nombre de la categoría es obligatorio.");
+    return;
+  }
+
+
+  try {
+    setError("");
+
+    await apiPost("/v1/catalogo/categorias", {
+      nombre: nuevaCategoria.nombre.trim(),
+      descripcion: nuevaCategoria.descripcion.trim(),
+    });
+
+    const data = await apiGet("/v1/catalogo/categorias");
+
+    setCategorias(
+      Array.isArray(data)
+        ? data
+        : data.content || data.items || []
+    );
+
+    setNuevaCategoria({
+      nombre: "",
+      descripcion: "",
+    });
+
+    setMostrarFormulario(false);
+  } catch (error) {
+    console.error("Error creando categoría:", error);
+    setError(
+      error.message || "No fue posible crear la categoría."
+    );
+  }
+};
+const crearPrioridad = async () => {
+  if (!nuevaPrioridad.nombre.trim()) {
+    setError("El nombre de la prioridad es obligatorio.");
+    return;
+  }
+
+  try {
+    setError("");
+
+    await apiPost("/v1/catalogo/prioridades", {
+      nombre: nuevaPrioridad.nombre.trim(),
+      descripcion: nuevaPrioridad.descripcion.trim(),
+    });
+
+    const data = await apiGet("/v1/catalogo/prioridades");
+
+    setPrioridades(
+      Array.isArray(data)
+        ? data
+        : data.content || data.items || []
+    );
+
+    setNuevaPrioridad({
+      nombre: "",
+      descripcion: "",
+    });
+
+  } catch (error) {
+    console.error("Error creando prioridad:", error);
+
+    setError(
+      error.message || "No fue posible crear la prioridad."
+    );
+  }
+};
+const actualizarCategoria = async () => {
+  if (!categoriaEditando) {
+    return;
+  }
+  const eliminarCategoria = async (id) => {
+  const confirmar = window.confirm(
+    "¿Estás seguro de que deseas eliminar esta categoría?"
+  );
+
+  if (!confirmar) {
+    return;
+  }
+
+  try {
+    setError("");
+    setEliminandoId(id);
+
+    await apiDelete(`/v1/catalogo/categorias/${id}`);
+
+    const data = await apiGet("/v1/catalogo/categorias");
+
+    setCategorias(
+      Array.isArray(data)
+        ? data
+        : data.content || data.items || []
+    );
+  } catch (error) {
+    console.error("Error eliminando categoría:", error);
+
+    setError(
+      error.message || "No fue posible eliminar la categoría."
+    );
+  } finally {
+    setEliminandoId(null);
+  }
+};
+
+  if (!nuevaCategoria.nombre.trim()) {
+    setError("El nombre de la categoría es obligatorio.");
+    return;
+  }
+
+  try {
+    setError("");
+
+    await apiPut(
+      `/v1/catalogo/categorias/${categoriaEditando.id}`,
+      {
+        nombre: nuevaCategoria.nombre.trim(),
+        descripcion: nuevaCategoria.descripcion.trim(),
+      }
+    );
+
+    const data = await apiGet("/v1/catalogo/categorias");
+
+    setCategorias(
+      Array.isArray(data)
+        ? data
+        : data.content || data.items || []
+    );
+
+    setNuevaCategoria({
+      nombre: "",
+      descripcion: "",
+    });
+
+    setCategoriaEditando(null);
+    setMostrarFormulario(false);
+
+  } catch (error) {
+    console.error("Error actualizando categoría:", error);
+
+    setError(
+      error.message || "No fue posible actualizar la categoría."
+    );
+  }
+};
 
   return (
     <div className="catalogo-page">
@@ -101,22 +301,34 @@ function Catalogo() {
        
 
 
-        <section className="page-title">
+    <section className="page-title">
 
-          <span>
-            CATÁLOGO
-          </span>
+  <span>
+    CATÁLOGO
+  </span>
 
-          <h2>
-            Categorías de soporte
-          </h2>
+  <h2>
+    Categorías de soporte
+  </h2>
 
-          <p>
-            Consulta las categorías disponibles
-            para tus solicitudes.
-          </p>
+  <p>
+    Consulta las categorías disponibles
+    para tus solicitudes.
+  </p>
 
-        </section>
+  {!loadingRoles && esAdministrador && (
+    <button
+      type="button"
+      className="admin-catalog-button"
+      onClick={() => setModoAdministracion((prev) => !prev)}
+    >
+      {modoAdministracion
+        ? "Cerrar administración"
+        : "Administrar catálogo"}
+    </button>
+  )}
+
+</section>
 
 
         {/* CONTENIDO DEL CATÁLOGO */}
@@ -161,11 +373,184 @@ function Catalogo() {
               Reintentar
             </button>
 
+        
+
           </section>
 
         )}
 
+{modoAdministracion && mostrarFormulario && (
+  <section className="admin-category-form">
 
+    <div className="admin-form-header">
+      <div>
+        <span>ADMINISTRACIÓN</span>
+       <h3>
+  {categoriaEditando ? "Editar categoría" : "Nueva categoría"}
+</h3>
+      </div>
+
+      <button
+        type="button"
+        className="close-form-button"
+        onClick={() => setMostrarFormulario(false)}
+      >
+        ×
+      </button>
+    </div>
+
+    <div className="form-group">
+      <label htmlFor="nombreCategoria">
+        Nombre de la categoría
+      </label>
+
+      <input
+        id="nombreCategoria"
+        type="text"
+        value={nuevaCategoria.nombre}
+        onChange={(e) =>
+          setNuevaCategoria((prev) => ({
+            ...prev,
+            nombre: e.target.value,
+          }))
+        }
+        placeholder="Ej: Soporte de hardware"
+      />
+    </div>
+
+    <div className="form-group">
+      <label htmlFor="descripcionCategoria">
+        Descripción
+      </label>
+
+      <textarea
+        id="descripcionCategoria"
+        value={nuevaCategoria.descripcion}
+        onChange={(e) =>
+          setNuevaCategoria((prev) => ({
+            ...prev,
+            descripcion: e.target.value,
+          }))
+        }
+        placeholder="Describe esta categoría..."
+        rows="4"
+      />
+    </div>
+<button
+  type="button"
+  className="primary-button"
+  onClick={categoriaEditando ? actualizarCategoria : crearCategoria}
+>
+  {categoriaEditando ? "Guardar cambios" : "Crear categoría"}
+</button>
+  </section>
+)}
+{modoAdministracion && esAdministrador && (
+  <section className="admin-prioridades">
+
+    <div className="admin-form-header">
+  <div>
+    <span>ADMINISTRACIÓN</span>
+    <h3>Prioridades</h3>
+  </div>
+  {modoAdministracion && prioridadEditando === null && (
+  <div className="priority-form">
+
+    <div className="form-group">
+      <label htmlFor="nombrePrioridad">
+        Nombre de la prioridad
+      </label>
+
+      <input
+        id="nombrePrioridad"
+        type="text"
+        value={nuevaPrioridad.nombre}
+        onChange={(e) =>
+          setNuevaPrioridad((prev) => ({
+            ...prev,
+            nombre: e.target.value,
+          }))
+        }
+        placeholder="Ej: Alta"
+      />
+    </div>
+
+    <div className="form-group">
+      <label htmlFor="descripcionPrioridad">
+        Descripción
+      </label>
+
+      <textarea
+        id="descripcionPrioridad"
+        value={nuevaPrioridad.descripcion}
+        onChange={(e) =>
+          setNuevaPrioridad((prev) => ({
+            ...prev,
+            descripcion: e.target.value,
+          }))
+        }
+        placeholder="Describe esta prioridad..."
+        rows="3"
+      />
+    </div>
+
+ <button
+  type="button"
+  className="primary-button"
+  onClick={crearPrioridad}
+>
+  Crear prioridad
+</button>
+)}
+
+  <button
+    type="button"
+    className="primary-button"
+    onClick={() => {
+      setPrioridadEditando(null);
+      setNuevaPrioridad({
+        nombre: "",
+        descripcion: "",
+      });
+    }}
+  >
+    Nueva prioridad
+  </button>
+</div>
+
+    {loadingPrioridades ? (
+      <p>Cargando prioridades...</p>
+    ) : prioridades.length === 0 ? (
+      <p>No hay prioridades registradas.</p>
+    ) : (
+      <div className="priority-list">
+
+        {prioridades.map((prioridad) => (
+          <article
+            className="priority-item"
+            key={prioridad.id}
+          >
+            <div>
+              <h4>
+                {prioridad.nombre ||
+                  prioridad.name ||
+                  "Prioridad"}
+              </h4>
+
+              <p>
+                {prioridad.descripcion ||
+                  prioridad.description ||
+                  "Sin descripción"}
+              </p>
+            </div>
+          </article>
+        ))}
+
+      </div>
+    )}
+
+  </section>
+)}
         {!loading &&
           !error &&
           categorias.length === 0 && (
@@ -227,6 +612,37 @@ function Catalogo() {
                   </p>
 
                 </div>
+{modoAdministracion && esAdministrador && (
+  <div className="category-actions">
+
+    <button
+      type="button"
+      className="edit-category-button"
+      onClick={() => {
+        setCategoriaEditando(categoria);
+        setNuevaCategoria({
+          nombre: categoria.nombre || "",
+          descripcion: categoria.descripcion || "",
+        });
+        setMostrarFormulario(true);
+      }}
+    >
+      Editar
+    </button>
+
+    <button
+      type="button"
+      className="delete-category-button"
+      onClick={() => eliminarCategoria(categoria.id)}
+      disabled={eliminandoId === categoria.id}
+    >
+      {eliminandoId === categoria.id
+        ? "Eliminando..."
+        : "Eliminar"}
+    </button>
+
+  </div>
+)}
 
               </article>
 
