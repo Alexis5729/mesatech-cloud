@@ -1,6 +1,6 @@
-# Checklist AWS y evidencias del Integrante 3
+# Registro de despliegue y validación en AWS
 
-## Alcance exacto
+## Alcance
 
 El Integrante 3 debe desplegar y demostrar en Amazon EC2:
 
@@ -11,7 +11,7 @@ El Integrante 3 debe desplegar y demostrar en Amazon EC2:
 
 No corresponde al Integrante 3 configurar React, Microsoft Entra ID, JWT Authorizer, CORS o las rutas de API Gateway. La integración local y en EC2 con el BFF se valida junto con el Integrante 2, sin modificar su código sin coordinación.
 
-## Alternativa acordada
+## Arquitectura de despliegue
 
 El equipo confirmó el uso de **dos instancias EC2**. Se utilizará PostgreSQL instalado en la EC2 del Integrante 3, en lugar de RDS.
 
@@ -31,7 +31,7 @@ React -> API Gateway -> EC2 Integrante 2
 
 Las dos instancias deben quedar en la misma región y VPC. El BFF utilizará la IP privada o DNS privado de la EC2 del Integrante 3 para llamar a los microservicios. PostgreSQL será utilizado localmente por los microservicios y no se expondrá a Internet.
 
-## Antes de entrar a AWS
+## Preparación previa
 
 - [x] El equipo confirmó dos EC2: una para BFF/seguridad y otra para microservicios/BD.
 - [ ] Alexis confirma la región y VPC donde creará su EC2 para usar las mismas en ambas instancias.
@@ -39,11 +39,11 @@ Las dos instancias deben quedar en la misma región y VPC. El BFF utilizará la 
 - [ ] Los dos JAR están generados con `clean package`.
 - [ ] La rama `damian/microservices-db` está actualizada y sin secretos.
 - [ ] La contraseña débil usada localmente se reemplaza por una contraseña fuerte para EC2.
-- [ ] Se acuerda dónde se guardarán las capturas: `docs/evidencias/microservices-db/aws/`.
+- [ ] Las evidencias se organizan en `docs/evidencias/microservices-db/aws/` o se incorporan directamente al informe final.
 
-## Configuración y capturas que sí corresponden
+## Evidencias de infraestructura y despliegue
 
-La pauta solicita un informe pormenorizado con capturas de cada paso de configuración cloud. Guardar las imágenes en orden y sin contraseñas visibles.
+Cada evidencia debe mostrar el resultado de una configuración o prueba relevante y estar acompañada por una descripción breve. No es necesario registrar acciones repetidas que no aporten información adicional.
 
 ### 1. Instancia EC2
 
@@ -93,7 +93,7 @@ JPA_DDL_AUTO=validate
 
 Primero se ejecutan los scripts SQL y después se inicia con `JPA_DDL_AUTO=validate`, para comprobar que el esquema desplegado coincide con las entidades.
 
-## Pruebas y capturas funcionales de tu parte
+## Validación funcional
 
 - [ ] Crear una categoría y una prioridad mediante `catalogo-service`.
 - [ ] Crear una solicitud mediante `POST /v1/solicitudes` y `X-User-Id`.
@@ -118,7 +118,9 @@ Las pruebas directas pueden ejecutarse con `curl` desde la propia EC2. La prueba
 - [ ] Probar una operación de solicitudes y una de catálogo a través del BFF.
 - [ ] Confirmar que el BFF no contiene conexión a PostgreSQL.
 
-## Nombres sugeridos para las capturas
+## Convención de archivos de evidencia
+
+Para conservar el orden cronológico y facilitar su incorporación al informe, las imágenes pueden identificarse con un número correlativo y una descripción breve:
 
 ```text
 01-ec2-instancia-running.png
@@ -136,23 +138,19 @@ Las pruebas directas pueden ejecutarse con `curl` desde la propia EC2. La prueba
 13-integracion-bff-microservicios.png
 ```
 
-## Cómo usar las capturas en la entrega
+## Presentación de evidencias
 
-- En el informe pormenorizado se incluyen las capturas de cada paso de configuración AWS que se haya realizado, acompañadas por una explicación breve.
-- En la presentación se utiliza solamente un resumen de las capturas más importantes; la pauta indica que no se debe ejecutar la aplicación en vivo durante la exposición.
-- El equipo debe quedar preparado para iniciar los servicios y demostrar la aplicación si el docente lo solicita durante las preguntas.
-- Las capturas de React, Entra ID, API Gateway y seguridad las aportan los Integrantes 1 y 2; tú aportas las de EC2, microservicios, PostgreSQL y pruebas de negocio/persistencia.
+- El informe debe conservar las evidencias necesarias para demostrar la configuración de AWS, el funcionamiento de los servicios y la persistencia de los datos.
+- Cada figura debe incluir un título y una explicación del resultado observado. La captura complementa la explicación, pero no la reemplaza.
+- La presentación utiliza una selección de los resultados principales. Los detalles de comandos y configuraciones permanecen en el informe.
+- El equipo mantiene los servicios disponibles para una demostración si el docente la solicita durante las preguntas.
+- React, Microsoft Entra ID, API Gateway y seguridad son documentados por los Integrantes 1 y 2. El Integrante 3 documenta EC2, microservicios, PostgreSQL y las pruebas de negocio y persistencia.
 
-## No incluir en capturas o Git
+## Protección de credenciales y datos sensibles
 
-- Contraseñas de PostgreSQL.
-- Archivo de llave privada `.pem`.
-- Variables con secretos visibles.
-- Tokens JWT completos.
-- Client secrets o credenciales de AWS.
-- Connection strings que incluyan contraseñas.
+Antes de incorporar una evidencia al informe o al repositorio, se debe revisar que no exponga contraseñas, tokens JWT, claves privadas, secretos de aplicaciones, credenciales de AWS ni cadenas de conexión con datos sensibles. Las variables de configuración pueden mostrarse utilizando valores de ejemplo o campos ocultos. Los archivos `.pem` y los archivos de entorno locales permanecen fuera del control de versiones.
 
-## Criterio de terminado del Integrante 3
+## Criterios de aceptación
 
 - [ ] Ambos microservicios funcionan en EC2.
 - [ ] PostgreSQL funciona en EC2 y solo los microservicios acceden a sus datos.
