@@ -302,4 +302,70 @@ tbody tr:hover {
   td {
     padding: 10px;
   }
+  /* =====================================================
+   ACCIONES DE SOLICITUD
+   ===================================================== */
+
+.actions-cell {
+  min-width: 230px;
+}
+
+.actions-cell select {
+  width: 100%;
+  padding: 9px 34px 9px 12px;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+  margin-bottom: 7px;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.actions-cell select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.actions-cell select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.update-status-button {
+  width: 100%;
+  padding: 9px 12px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.update-status-button:hover:not(:disabled) {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 12px rgba(37, 99, 235, 0.18);
+}
+
+.update-status-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.update-status-button:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+}
 }
