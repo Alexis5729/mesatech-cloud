@@ -172,69 +172,47 @@ function Login() {
   // LOGOUT
 
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
 
     setError("");
     setTokenObtained(false);
 
-    try {
-
-      await instance.logoutPopup();
-
-    } catch (error) {
-
-      console.error(
-        "Error al cerrar sesión:",
-        error
-      );
-
-      setError(
-        "No fue posible cerrar la sesión."
-      );
-    }
+    instance.logoutRedirect({
+      account: account,
+      postLogoutRedirectUri: "/",
+    });
   };
 
   // INTERFAZ
-  
 
   return (
 
     <div className="login-page">
-
       <div className="login-container">
-
 
         {/* ENCABEZADO */}
 
         <div className="login-header">
-
           <h1>
             MESATECH CLOUD
           </h1>
-
           <p>
             Sistema ERP para PYMEs
           </p>
-
         </div>
         
 
 
-        {/* 
-            USUARIO NO AUTENTICADO */}
+        {/* USUARIO NO AUTENTICADO */}
 
         {!isAuthenticated && (
-
           <div className="login-card">
-
             <h2>
               Iniciar sesión
             </h2>
-
             <p className="login-subtitle">
               Ingresa con tu cuenta corporativa de Microsoft
             </p>
-
 
             <form onSubmit={handleLogin}>
 
@@ -245,49 +223,33 @@ function Login() {
                   loading ||
                   inProgress !==
                     InteractionStatus.None
-                }
-              >
-
+                }>
                 {loading
                   ? "Iniciando sesión..."
                   : "Iniciar sesión con Microsoft"}
-
               </button>
 
-
               {error && (
-
                 <p className="error-message">
                   {error}
                 </p>
-
               )}
-
             </form>
-
           </div>
-
         )}
 
-
-        {/* 
-            USUARIO AUTENTICADO */}
+        {/* USUARIO AUTENTICADO */}
 
         {isAuthenticated && account && (
-
           <div className="login-card">
-
             <h2>
               Bienvenido
             </h2>
-
             <p className="login-subtitle">
               Has iniciado sesión correctamente
             </p>
 
-
             <div className="authenticated-user">
-
               <p>
                 <strong>
                   Nombre:
@@ -295,14 +257,12 @@ function Login() {
                 {account.name}
               </p>
 
-
               <p>
                 <strong>
                   Correo:
                 </strong>{" "}
                 {account.username}
               </p>
-
 
               {/* CLAIM */}
 
@@ -316,39 +276,28 @@ function Login() {
                     ?.email ||
                   "No disponible"}
               </p>
-
             </div>
-
 
             {/* TOKEN */}
 
             <div className="token-status">
-
               {tokenObtained ? (
-
                 <p>
                    Access Token obtenido
                 </p>
-
               ) : (
-
                 <p>
                   Access Token no disponible
                 </p>
-
               )}
-
             </div>
-
 
             {/* ERROR */}
 
             {error && (
-
               <p className="error-message">
                 {error}
               </p>
-
             )}
 
 
@@ -361,24 +310,15 @@ function Login() {
             >
               Cerrar sesión
             </button>
-
           </div>
-
         )}
 
-
-        {/* 
-            FIRMA */}
+        {/* FIRMA */}
 
         <footer className="developer-signature">
-
           Desarrollado por Alexis Poblete, Damian Villanueva y Francisco Vásquez | Sistema creado para la asignatura de Desarrollo Cloud Native 2026
-
         </footer>
-
-
       </div>
-
     </div>
   );
 }

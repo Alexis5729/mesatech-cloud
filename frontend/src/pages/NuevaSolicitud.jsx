@@ -30,8 +30,8 @@ useEffect(() => {
       setLoadingCategorias(true);
 
       const data = await apiGet(
-        "/v1/catalogo/categorias"
-      );
+          "/v1/solicitudes/categorias"
+          );
 
       setCategorias(
         Array.isArray(data)
