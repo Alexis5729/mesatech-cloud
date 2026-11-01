@@ -5,15 +5,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 @Configuration
@@ -29,6 +28,12 @@ public class SecurityConfig {
 
                         .requestMatchers("/health",
                                 "/error")
+                        .permitAll()
+
+                        .requestMatchers(
+                                HttpMethod.OPTIONS,
+                                "/**"
+                        )
                         .permitAll()
 
                         .requestMatchers(
@@ -130,28 +135,47 @@ public class SecurityConfig {
     }
 
     @Bean
-    public JwtAuthenticationConverter jwtAuthenticationConverter(){
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
 
-        //Convierte el claim "scp: access_as_user -> SCOPE_access_as_user
-        JwtGrantedAuthoritiesConverter scopeConverter = new JwtGrantedAuthoritiesConverter();
-
-        //Convierte el claim "roles": ADMINISTRADOR -> ROLE_ADMINISTRADOR
-        JwtGrantedAuthoritiesConverter roleConverter = new JwtGrantedAuthoritiesConverter();
-        roleConverter.setAuthoritiesClaimName("roles");
-        roleConverter.setAuthorityPrefix("ROLE_");
-
-        JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
+        JwtAuthenticationConverter jwtConverter =
+                new JwtAuthenticationConverter();
 
         jwtConverter.setJwtGrantedAuthoritiesConverter(jwt -> {
-            Collection<GrantedAuthority> authorities = new ArrayList<>();
 
-            authorities.addAll(scopeConverter.convert(jwt));
-            authorities.addAll(roleConverter.convert(jwt));
+            List<GrantedAuthority> authorities =
+                    new ArrayList<>();
+
+            // Scope de Microsoft Entra ID
+            String scopes = jwt.getClaimAsString("scp");
+
+            if (scopes != null && !scopes.isBlank()) {
+                for (String scope : scopes.split(" ")) {
+                    authorities.add(
+                            new SimpleGrantedAuthority(
+                                    "SCOPE_" + scope
+                            )
+                    );
+                }
+            }
+
+            // Roles de Microsoft Entra ID
+            List<String> roles =
+                    jwt.getClaimAsStringList("roles");
+
+            if (roles != null) {
+                for (String role : roles) {
+                    authorities.add(
+                            new SimpleGrantedAuthority(
+                                    "ROLE_" + role
+                            )
+                    );
+                }
+            }
 
             return authorities;
         });
 
-        return  jwtConverter;
+        return jwtConverter;
     }
 
     @Bean
