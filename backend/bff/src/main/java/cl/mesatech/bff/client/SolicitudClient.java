@@ -1,6 +1,7 @@
 package cl.mesatech.bff.client;
 
 import cl.mesatech.bff.dto.ActualizarEstadoRequest;
+import cl.mesatech.bff.dto.CategoriaResponse;
 import cl.mesatech.bff.dto.CrearSolicitudRequest;
 import cl.mesatech.bff.dto.SolicitudResponse;
 import cl.mesatech.bff.dto.SolicitudV2Response;
@@ -55,6 +56,14 @@ public class SolicitudClient {
                 .body(request)
                 .retrieve()
                 .body(SolicitudResponse.class);
+    }
+
+    public CategoriaResponse[] obtenerCategoriasLocales(){
+        return restClient
+                .get()
+                .uri("/v1/solicitudes/categorias")
+                .retrieve()
+                .body(CategoriaResponse[].class);
     }
 
     public SolicitudV2Response[] obtenerSolicitudesV2(){

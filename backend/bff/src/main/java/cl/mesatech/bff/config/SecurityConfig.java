@@ -53,6 +53,16 @@ public class SecurityConfig {
 
                         .requestMatchers(
                                 HttpMethod.GET,
+                                "/v1/solicitudes/categorias"
+                        )
+                        .hasAnyRole(
+                                "CLIENTE",
+                                "OPERADOR",
+                                "ADMINISTRADOR"
+                        )
+
+                        .requestMatchers(
+                                HttpMethod.GET,
                                 "/v1/solicitudes"
                         )
                         .hasAnyRole(

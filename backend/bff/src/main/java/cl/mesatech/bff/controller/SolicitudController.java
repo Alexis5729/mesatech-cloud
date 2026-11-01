@@ -2,6 +2,7 @@ package cl.mesatech.bff.controller;
 
 import cl.mesatech.bff.client.SolicitudClient;
 import cl.mesatech.bff.dto.ActualizarEstadoRequest;
+import cl.mesatech.bff.dto.CategoriaResponse;
 import cl.mesatech.bff.dto.CrearSolicitudRequest;
 import cl.mesatech.bff.dto.SolicitudResponse;
 import jakarta.validation.Valid;
@@ -17,6 +18,11 @@ public class SolicitudController {
 
     public SolicitudController(SolicitudClient solicitudClient) {
         this.solicitudClient = solicitudClient;
+    }
+
+    @GetMapping("/categorias")
+    public CategoriaResponse[] obtenerCategoriasLocales(){
+        return solicitudClient.obtenerCategoriasLocales();
     }
 
     @GetMapping
