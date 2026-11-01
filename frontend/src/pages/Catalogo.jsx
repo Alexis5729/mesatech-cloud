@@ -1,12 +1,7 @@
 import { useEffect, useState } from "react";
 import { useMsal } from "@azure/msal-react";
 import { useNavigate } from "react-router-dom";
-import {
-  apiGet,
-  apiPost,
-  apiPut,
-  apiDelete,
-} from "../services/api";
+import { apiGet, apiPost, apiPut, apiDelete } from "../services/api";
 import { useUserRoles } from "../hooks/useUserRoles";
 import "./Catalogo.css";
 
