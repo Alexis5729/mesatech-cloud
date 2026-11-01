@@ -9,6 +9,7 @@ import cl.mesatech.solicitudes.entity.Solicitud;
 import cl.mesatech.solicitudes.exception.SolicitudInvalidaException;
 import cl.mesatech.solicitudes.exception.SolicitudNoEncontradaException;
 import cl.mesatech.solicitudes.exception.TransicionEstadoInvalidaException;
+import cl.mesatech.solicitudes.repository.CategoriaLocalRepository;
 import cl.mesatech.solicitudes.repository.SolicitudRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -25,14 +26,25 @@ import java.util.List;
 public class SolicitudService {
 
     private final SolicitudRepository solicitudRepository;
+    private final CategoriaLocalRepository categoriaLocalRepository;
 
-    public SolicitudService(SolicitudRepository solicitudRepository) {
+    public SolicitudService(
+            SolicitudRepository solicitudRepository,
+            CategoriaLocalRepository categoriaLocalRepository) {
         this.solicitudRepository = solicitudRepository;
+        this.categoriaLocalRepository = categoriaLocalRepository;
     }
 
     @Transactional
     public SolicitudResponse crear(CrearSolicitudRequest request, String usuarioId) {
         String usuarioNormalizado = validarUsuario(usuarioId);
+
+        if (!categoriaLocalRepository.existsById(request.categoriaId())) {
+            throw new SolicitudInvalidaException(
+                    "La categoría " + request.categoriaId()
+                            + " no existe en el catálogo local de Solicitudes"
+            );
+        }
 
         Solicitud solicitud = new Solicitud(
                 request.titulo().trim(),

@@ -16,3 +16,12 @@ CREATE TABLE IF NOT EXISTS solicitudes (
 -- Acelera GET /v1/solicitudes/mias.
 CREATE INDEX IF NOT EXISTS idx_solicitudes_usuario_fecha
     ON solicitudes (usuario_solicitante, fecha_creacion DESC);
+
+-- Copia local de categorías recibidas mediante RabbitMQ.
+CREATE TABLE IF NOT EXISTS categorias_locales (
+    categoria_id BIGINT PRIMARY KEY,
+    nombre VARCHAR(150) NOT NULL,
+    event_id VARCHAR(36) NOT NULL UNIQUE,
+    fecha_evento TIMESTAMPTZ NOT NULL,
+    fecha_recepcion TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
