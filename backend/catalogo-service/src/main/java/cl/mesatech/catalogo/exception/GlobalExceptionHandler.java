@@ -1,6 +1,7 @@
 package cl.mesatech.catalogo.exception;
 
 import cl.mesatech.catalogo.dto.ErrorResponse;
+import org.springframework.amqp.AmqpException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -39,8 +40,17 @@ public class GlobalExceptionHandler {
         return crearRespuesta(HttpStatus.BAD_REQUEST, "El cuerpo JSON es inválido");
     }
 
+    @ExceptionHandler(AmqpException.class)
+    public ResponseEntity<ErrorResponse> manejarErrorRabbitMQ(AmqpException ex) {
+        return crearRespuesta(
+                HttpStatus.BAD_GATEWAY,
+                "La categoría fue guardada, pero no se pudo confirmar la publicación en RabbitMQ"
+        );
+    }
+
     private ResponseEntity<ErrorResponse> crearRespuesta(HttpStatus status, String message) {
         ErrorResponse error = new ErrorResponse(status.value(), message, OffsetDateTime.now(ZoneOffset.UTC));
         return ResponseEntity.status(status).body(error);
     }
+
 }
