@@ -1,7 +1,7 @@
-import { useState } from "react";
+import {useEffect,useState,} from "react";
 import { useNavigate } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
-import { apiPost } from "../services/api";
+import {apiGet,apiPost,} from "../services/api";
 import "./NuevaSolicitud.css";
 
 function NuevaSolicitud() {
@@ -20,7 +20,74 @@ function NuevaSolicitud() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [categorias, setCategorias] = useState([]);
+  const [loadingCategorias, setLoadingCategorias] = useState(true);
+  const [prioridades, setPrioridades] = useState([]);
+const [loadingPrioridades, setLoadingPrioridades] = useState(true);
+useEffect(() => {
+  const cargarCategorias = async () => {
+    try {
+      setLoadingCategorias(true);
 
+      const data = await apiGet(
+        "/v1/catalogo/categorias"
+      );
+
+      setCategorias(
+        Array.isArray(data)
+          ? data
+          : data.content || data.items || []
+      );
+
+    } catch (error) {
+      console.error(
+        "Error cargando categorías:",
+        error
+      );
+
+      setError(
+        "No fue posible cargar las categorías."
+      );
+
+    } finally {
+      setLoadingCategorias(false);
+    }
+  };
+
+  cargarCategorias();
+}, []);
+useEffect(() => {
+  const cargarPrioridades = async () => {
+    try {
+      setLoadingPrioridades(true);
+
+      const data = await apiGet(
+        "/v1/catalogo/prioridades"
+      );
+
+      setPrioridades(
+        Array.isArray(data)
+          ? data
+          : data.content || data.items || []
+      );
+
+    } catch (error) {
+      console.error(
+        "Error cargando prioridades:",
+        error
+      );
+
+      setError(
+        "No fue posible cargar las prioridades."
+      );
+
+    } finally {
+      setLoadingPrioridades(false);
+    }
+  };
+
+  cargarPrioridades();
+}, []);
   const handleChange = (event) => {
     const { name, value } = event.target;
 
@@ -50,6 +117,10 @@ function NuevaSolicitud() {
       setError("Debes seleccionar una categoría.");
       return;
     }
+    if (!formulario.prioridadId) {
+  setError("Debes seleccionar una prioridad.");
+  return;
+}
 
     try {
       setLoading(true);
@@ -67,13 +138,12 @@ function NuevaSolicitud() {
       setSuccess(
         "La solicitud fue creada correctamente."
       );
-
-      setFormulario({
-        titulo: "",
-        descripcion: "",
-        categoria: "",
-        prioridad: "MEDIA",
-      });
+setFormulario({
+  titulo: "",
+  descripcion: "",
+  categoriaId: "",
+  prioridadId: "",
+});
 
     } catch (error) {
       console.error(
@@ -233,22 +303,30 @@ function NuevaSolicitud() {
                 </label>
 
                 <select
-                  id="categoriaId"
-                  name="categoriaId"
-                  value={formulario.categoriaId}
-                  onChange={handleChange}
-                  disabled={loading}
-                >
-                  <option value="">
-                    Selecciona una categoría
-                  </option>
+  id="categoriaId"
+  name="categoriaId"
+  value={formulario.categoriaId}
+  onChange={handleChange}
+  disabled={loading || loadingCategorias}
+>
+  <option value="">
+    {loadingCategorias
+      ? "Cargando categorías..."
+      : "Selecciona una categoría"}
+  </option>
 
-                  <option value="1">Hardware</option>
-                  <option value="2">Software</option>
-                  <option value="3">Accesos</option>
-                  <option value="4">Conectividad</option>
-                </select>
-
+  {categorias.map((categoria) => (
+    <option
+      key={categoria.id}
+      value={categoria.id}
+    >
+      {categoria.nombre ||
+        categoria.name ||
+        categoria.descripcion ||
+        "Categoría"}
+    </option>
+  ))}
+</select>
               </div>
 
 
@@ -260,18 +338,31 @@ function NuevaSolicitud() {
                   Prioridad
                 </label>
 
-                <select
-                  id="prioridadId"
-                  name="prioridadId"
-                  value={formulario.prioridadId}
-                  onChange={handleChange}
-                  disabled={loading}
-                >
-                  <option value="1">Baja</option>
-                  <option value="2">Media</option>
-                  <option value="3">Alta</option>
-                  <option value="4">Crítica</option>
-                </select>
+              <select
+  id="prioridadId"
+  name="prioridadId"
+  value={formulario.prioridadId}
+  onChange={handleChange}
+  disabled={loading || loadingPrioridades}
+>
+  <option value="">
+    {loadingPrioridades
+      ? "Cargando prioridades..."
+      : "Selecciona una prioridad"}
+  </option>
+
+  {prioridades.map((prioridad) => (
+    <option
+      key={prioridad.id}
+      value={prioridad.id}
+    >
+      {prioridad.nombre ||
+        prioridad.name ||
+        prioridad.descripcion ||
+        "Prioridad"}
+    </option>
+  ))}
+</select>
 
               </div>
 

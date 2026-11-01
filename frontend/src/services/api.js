@@ -1,3 +1,4 @@
+
 import {
   msalInstance,
   loginRequest,
@@ -8,7 +9,6 @@ import {
 // =====================================================
 
 const API_URL = import.meta.env.VITE_API_URL;
-
 
 // =====================================================
 // OBTENER ACCESS TOKEN
@@ -37,10 +37,6 @@ export async function getAccessToken() {
         "Microsoft Entra ID no devolvió un Access Token."
       );
     }
-
-    console.log(
-      "Access Token obtenido para API"
-    );
 
     return response.accessToken;
 
@@ -175,7 +171,14 @@ export async function apiPut(
 
     body: JSON.stringify(data),
   });
+  
 
+}
+export async function apiPatch(endpoint, data) {
+  return request(endpoint, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
 }
 
 

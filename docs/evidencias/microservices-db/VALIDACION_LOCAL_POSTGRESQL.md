@@ -79,7 +79,7 @@ $env:DB_USERNAME = "postgres"
 $env:DB_PASSWORD = "<CONTRASEÑA_LOCAL>"
 ```
 
-La contraseña real no debe escribirse en `application.yml`, README, scripts ni capturas.
+Las credenciales se suministran mediante variables de entorno y se mantienen fuera del código fuente, la documentación y las evidencias visuales.
 
 ## Compilación y pruebas
 
@@ -108,4 +108,4 @@ JAR generados:
 
 ## Resultado
 
-La persistencia local y la compilación de ambos microservicios están validadas. El despliegue en EC2 queda pendiente para la etapa AWS.
+La persistencia local y la compilación de ambos microservicios quedaron validadas antes del despliegue. Esta verificación se complementó posteriormente con las pruebas realizadas sobre PostgreSQL y los servicios ejecutados en EC2.

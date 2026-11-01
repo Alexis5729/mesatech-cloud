@@ -1,6 +1,6 @@
 # Catálogo Service
 
-Microservicio del **Integrante 3** para mantener categorías y prioridades. Usa Java 17, Spring Boot, JPA y PostgreSQL.
+Microservicio responsable de administrar las categorías y prioridades utilizadas por las solicitudes. Está desarrollado con Java 17, Spring Boot, JPA y PostgreSQL.
 
 ## Responsabilidad
 
@@ -70,7 +70,7 @@ $env:DB_PASSWORD = "tu_clave_local"
 .\mvnw.cmd spring-boot:run
 ```
 
-No se deben guardar contraseñas reales en Git.
+Las credenciales se suministran mediante variables de entorno y se mantienen fuera del repositorio.
 
 ## Pruebas
 
@@ -80,7 +80,7 @@ No se deben guardar contraseñas reales en Git.
 
 Las pruebas usan H2 y validan el CRUD completo de categorías y prioridades, persistencia, duplicados, validaciones y arranque del contexto.
 
-## Estructura simple
+## Organización interna
 
 ```text
 controller/   define los endpoints

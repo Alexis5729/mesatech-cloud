@@ -1,6 +1,6 @@
 # Solicitudes Service
 
-Microservicio del **Integrante 3** para crear, consultar y cambiar el estado de solicitudes. Usa Java 17, Spring Boot, JPA y PostgreSQL.
+Microservicio responsable de crear, consultar y administrar el ciclo de vida de las solicitudes. Está desarrollado con Java 17, Spring Boot, JPA y PostgreSQL.
 
 ## Responsabilidad
 
@@ -98,7 +98,7 @@ $env:DB_PASSWORD = "tu_clave_local"
 .\mvnw.cmd spring-boot:run
 ```
 
-No se deben guardar contraseñas reales en Git.
+Las credenciales se suministran mediante variables de entorno y se mantienen fuera del repositorio.
 
 ## Pruebas
 
@@ -108,7 +108,7 @@ No se deben guardar contraseñas reales en Git.
 
 Las pruebas usan H2 solo dentro del entorno de test. Cubren creación, consulta general, consulta por usuario, persistencia, flujo válido, transición inválida a `RESUELTA`, cancelación, errores del header y funcionamiento simultáneo de v1 y v2.
 
-## Estructura simple
+## Organización interna
 
 ```text
 controller/   recibe solicitudes HTTP
@@ -119,8 +119,8 @@ dto/          define los JSON de entrada y salida
 exception/    entrega errores uniformes
 ```
 
-## Pendiente de otras etapas
+## Integración y despliegue
 
-- Integración del BFF con estos endpoints.
-- Integración de `catalogo-service` con el BFF.
-- Instalación de PostgreSQL y despliegue en EC2.
+- El BFF consume los endpoints HTTP y propaga la identidad mediante `X-User-Id`.
+- El servicio se ejecuta en el puerto `8081` y utiliza PostgreSQL para la persistencia.
+- En AWS, las conexiones desde el BFF se restringen mediante Security Groups y PostgreSQL permanece sin exposición pública.
