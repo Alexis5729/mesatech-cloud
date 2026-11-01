@@ -1,18 +1,14 @@
 services:
   rabbitmq:
     image: rabbitmq:4.4.0-management
-    container_name: mesatech-rabbitmq
-    hostname: mesatech-rabbit
+    container_name: rabbitmq
+    hostname: mesatech-rabbitmq
     restart: unless-stopped
-
+    env_file:
+      - .env
     ports:
       - "5672:5672"
       - "15672:15672"
-
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_ADMIN_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_ADMIN_PASSWORD}
-
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
