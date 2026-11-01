@@ -6,9 +6,11 @@ spring:
   application:
     name: catalogo-service
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/mesatech}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:}
+    # En desarrollo local Catálogo utiliza una base independiente.
+    # En AWS CATALOGO_DB_URL debe apuntar exclusivamente a RDS Catálogo.
+    url: ${CATALOGO_DB_URL:jdbc:postgresql://localhost:5432/mesatech_catalogo}
+    username: ${CATALOGO_DB_USERNAME:postgres}
+    password: ${CATALOGO_DB_PASSWORD:}
   jpa:
     open-in-view: false
     hibernate:
