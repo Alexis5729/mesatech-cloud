@@ -43,10 +43,6 @@ public class SolicitudController {
 
     @PatchMapping("/{id}/estado")
     public SolicitudResponse actualizarEstado(
-
-
-
-
             @PathVariable Long id,
             @Valid @RequestBody ActualizarEstadoRequest request){
 

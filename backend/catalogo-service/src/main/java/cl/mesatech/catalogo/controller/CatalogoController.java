@@ -4,6 +4,8 @@ import cl.mesatech.catalogo.dto.CategoriaRequest;
 import cl.mesatech.catalogo.dto.CategoriaResponse;
 import cl.mesatech.catalogo.dto.PrioridadRequest;
 import cl.mesatech.catalogo.dto.PrioridadResponse;
+import cl.mesatech.catalogo.messaging.CategoriaCreadaEvent;
+import cl.mesatech.catalogo.messaging.CategoriaPublisher;
 import cl.mesatech.catalogo.service.CatalogoService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -17,7 +19,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 // API v1 para que el BFF consulte y mantenga el catálogo.
 @RestController
@@ -25,9 +29,14 @@ import java.util.List;
 public class CatalogoController {
 
     private final CatalogoService catalogoService;
+    private final CategoriaPublisher categoriaPublisher;
 
-    public CatalogoController(CatalogoService catalogoService) {
+    public CatalogoController(
+            CatalogoService catalogoService,
+            CategoriaPublisher categoriaPublisher) {
+
         this.catalogoService = catalogoService;
+        this.categoriaPublisher = categoriaPublisher;
     }
 
     @GetMapping("/categorias")
@@ -38,7 +47,22 @@ public class CatalogoController {
     @PostMapping("/categorias")
     @ResponseStatus(HttpStatus.CREATED)
     public CategoriaResponse crearCategoria(@Valid @RequestBody CategoriaRequest request) {
-        return catalogoService.crearCategoria(request);
+
+        CategoriaResponse categoria =
+                catalogoService.crearCategoria(request);
+
+        CategoriaCreadaEvent evento =
+                new CategoriaCreadaEvent(
+                        UUID.randomUUID().toString(),
+                        "categoria.creada",
+                        Instant.now(),
+                        categoria.id(),
+                        categoria.nombre()
+                );
+
+        categoriaPublisher.publicar(evento);
+
+        return categoria;
     }
 
     @PutMapping("/categorias/{id}")
