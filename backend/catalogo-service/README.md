@@ -148,7 +148,7 @@ La integración utiliza:
 | Tipo              | `direct`                     |
 | Routing Key       | `categoria.creada`           |
 | Queue destino     | `solicitudes.catalogo.queue` |
-| Usuario publisher | `mesatech_publicador`        |
+| Usuario publisher | `catalogo-publisher`        |
 
 Los mensajes se publican como persistentes.
 
@@ -230,7 +230,7 @@ $env:DB_PASSWORD = "tu_clave_local"
 
 $env:RABBITMQ_HOST = "localhost"
 $env:RABBITMQ_PORT = "5672"
-$env:RABBITMQ_USERNAME = "mesatech_publicador"
+$env:RABBITMQ_USERNAME = "catalogo-publisher"
 $env:RABBITMQ_PASSWORD = "tu_clave_rabbitmq"
 $env:RABBITMQ_VHOST = "mesatech"
 
