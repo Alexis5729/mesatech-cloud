@@ -161,7 +161,7 @@ Ejemplo de respuesta:
 | Tipo             | `direct`                     |
 | Queue            | `solicitudes.catalogo.queue` |
 | Routing Key      | `categoria.creada`           |
-| Usuario consumer | `mesatech_consumidor`        |
+| Usuario consumer | `solicitudes-consumer`        |
 
 El servicio escucha la cola:
 
@@ -335,7 +335,7 @@ $env:DB_PASSWORD = "tu_clave_local"
 
 $env:RABBITMQ_HOST = "localhost"
 $env:RABBITMQ_PORT = "5672"
-$env:RABBITMQ_USERNAME = "mesatech_consumidor"
+$env:RABBITMQ_USERNAME = "solicitudes-consumer"
 $env:RABBITMQ_PASSWORD = "tu_clave_rabbitmq"
 $env:RABBITMQ_VHOST = "mesatech"
 
