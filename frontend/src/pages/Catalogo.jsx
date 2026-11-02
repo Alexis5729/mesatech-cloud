@@ -1,152 +1,256 @@
 import { useEffect, useState } from "react";
 import { useMsal } from "@azure/msal-react";
 import { useNavigate } from "react-router-dom";
-import { apiGet, apiPost, apiPut, apiDelete } from "../services/api";
+
+import {
+  apiGet,
+  apiPost,
+  apiPut,
+  apiDelete,
+} from "../services/api";
+
+import {
+  BookOpen,
+  FolderOpen,
+  Settings,
+  Plus,
+  Pencil,
+  Trash2,
+  AlertCircle,
+  X,
+  SlidersHorizontal,
+} from "lucide-react";
+
 import { useUserRoles } from "../hooks/useUserRoles";
+import PageHeader from "../components/PageHeader";
+
 import "./Catalogo.css";
 
 function Catalogo() {
-  const { accounts } = useMsal();
+  const {
+    instance,
+    accounts,
+  } = useMsal();
+
   const navigate = useNavigate();
 
-  const account = accounts[0];
+  /* =====================================================
+     CUENTA ACTIVA
+  ===================================================== */
+
+  const [account, setAccount] = useState(() =>
+    instance.getActiveAccount() ||
+    accounts[0] ||
+    null
+  );
 
   const {
     esAdministrador,
     loadingRoles,
-  } = useUserRoles();
+  } = useUserRoles(account);
 
-  // =========================
-  // CATEGORÍAS
-  // =========================
+  /* =====================================================
+     TEMA
+  ===================================================== */
 
-  const [categorias, setCategorias] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [theme, setTheme] = useState(() => {
+    const savedTheme =
+      localStorage.getItem(
+        "mesatech-theme"
+      );
 
-  // =========================
-  // PRIORIDADES
-  // =========================
+    if (
+      savedTheme === "light" ||
+      savedTheme === "dark"
+    ) {
+      return savedTheme;
+    }
 
-  const [prioridades, setPrioridades] = useState([]);
-  const [loadingPrioridades, setLoadingPrioridades] = useState(true);
+    return "dark";
+  });
 
-  // =========================
-  // ADMINISTRACIÓN
-  // =========================
+  useEffect(() => {
+    localStorage.setItem(
+      "mesatech-theme",
+      theme
+    );
+  }, [theme]);
 
-  const [modoAdministracion, setModoAdministracion] = useState(false);
-  const [mostrarFormulario, setMostrarFormulario] = useState(false);
+  /* =====================================================
+     CATEGORÍAS
+  ===================================================== */
 
-  const [error, setError] = useState("");
+  const [
+    categorias,
+    setCategorias,
+  ] = useState([]);
 
-  // =========================
-  // FORMULARIO CATEGORÍA
-  // =========================
+  const [
+    loading,
+    setLoading,
+  ] = useState(true);
 
-  const [nuevaCategoria, setNuevaCategoria] = useState({
+  /* =====================================================
+     PRIORIDADES
+  ===================================================== */
+
+  const [
+    prioridades,
+    setPrioridades,
+  ] = useState([]);
+
+  const [
+    loadingPrioridades,
+    setLoadingPrioridades,
+  ] = useState(true);
+
+  /* =====================================================
+     ADMINISTRACIÓN
+  ===================================================== */
+
+  const [
+    modoAdministracion,
+    setModoAdministracion,
+  ] = useState(false);
+
+  const [
+    mostrarFormulario,
+    setMostrarFormulario,
+  ] = useState(false);
+
+  const [
+    error,
+    setError,
+  ] = useState("");
+
+  /* =====================================================
+     FORMULARIO CATEGORÍA
+  ===================================================== */
+
+  const [
+    nuevaCategoria,
+    setNuevaCategoria,
+  ] = useState({
     nombre: "",
     descripcion: "",
   });
 
-  const [categoriaEditando, setCategoriaEditando] = useState(null);
+  const [
+    categoriaEditando,
+    setCategoriaEditando,
+  ] = useState(null);
 
-  // =========================
-  // FORMULARIO PRIORIDAD
-  // =========================
+  /* =====================================================
+     FORMULARIO PRIORIDAD
+  ===================================================== */
 
-  const [nuevaPrioridad, setNuevaPrioridad] = useState({
+  const [
+    nuevaPrioridad,
+    setNuevaPrioridad,
+  ] = useState({
     nombre: "",
     nivel: "",
   });
 
-  const [prioridadEditando, setPrioridadEditando] = useState(null);
+  const [
+    prioridadEditando,
+    setPrioridadEditando,
+  ] = useState(null);
 
-  // =========================
-  // ESTADOS DE OPERACIONES
-  // =========================
+  const [
+    eliminandoId,
+    setEliminandoId,
+  ] = useState(null);
 
-  const [eliminandoId, setEliminandoId] = useState(null);
+  /* =====================================================
+     CARGAR CATEGORÍAS
+  ===================================================== */
 
-  // =========================
-  // CARGAR CATEGORÍAS
-  // =========================
+  const cargarCatalogo = async () => {
+    try {
+      setLoading(true);
+      setError("");
 
-  useEffect(() => {
-    const cargarCatalogo = async () => {
-      try {
-        setLoading(true);
-        setError("");
-
-        const data = await apiGet(
+      const data =
+        await apiGet(
           "/v1/catalogo/categorias"
         );
 
-        setCategorias(
-          Array.isArray(data)
-            ? data
-            : data.content || data.items || []
-        );
-      } catch (error) {
-        console.error(
-          "Error cargando catálogo:",
-          error
-        );
+      setCategorias(
+        Array.isArray(data)
+          ? data
+          : data.content ||
+            data.items ||
+            []
+      );
+    } catch (error) {
+      console.error(
+        "Error cargando catálogo:",
+        error
+      );
 
-        setError(
-          "No fue posible cargar las categorías."
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+      setError(
+        "No fue posible cargar las categorías."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     cargarCatalogo();
   }, []);
 
-  // =========================
-  // CARGAR PRIORIDADES
-  // =========================
+  /* =====================================================
+     CARGAR PRIORIDADES
+  ===================================================== */
 
-  useEffect(() => {
-    const cargarPrioridades = async () => {
-      try {
-        setLoadingPrioridades(true);
+  const cargarPrioridades = async () => {
+    try {
+      setLoadingPrioridades(true);
 
-        const data = await apiGet(
+      const data =
+        await apiGet(
           "/v1/catalogo/prioridades"
         );
 
-        setPrioridades(
-          Array.isArray(data)
-            ? data
-            : data.content || data.items || []
-        );
-      } catch (error) {
-        console.error(
-          "Error cargando prioridades:",
-          error
-        );
+      setPrioridades(
+        Array.isArray(data)
+          ? data
+          : data.content ||
+            data.items ||
+            []
+      );
+    } catch (error) {
+      console.error(
+        "Error cargando prioridades:",
+        error
+      );
 
-        setError(
-          "No fue posible cargar las prioridades."
-        );
-      } finally {
-        setLoadingPrioridades(false);
-      }
-    };
+      setError(
+        "No fue posible cargar las prioridades."
+      );
+    } finally {
+      setLoadingPrioridades(false);
+    }
+  };
 
+  useEffect(() => {
     cargarPrioridades();
   }, []);
 
-  // =========================
-  // CREAR CATEGORÍA
-  // =========================
+  /* =====================================================
+     CREAR CATEGORÍA
+  ===================================================== */
 
   const crearCategoria = async () => {
-    if (!nuevaCategoria.nombre.trim()) {
+    if (
+      !nuevaCategoria.nombre.trim()
+    ) {
       setError(
         "El nombre de la categoría es obligatorio."
       );
+
       return;
     }
 
@@ -156,21 +260,15 @@ function Catalogo() {
       await apiPost(
         "/v1/catalogo/categorias",
         {
-          nombre: nuevaCategoria.nombre.trim(),
+          nombre:
+            nuevaCategoria.nombre.trim(),
+
           descripcion:
             nuevaCategoria.descripcion.trim(),
         }
       );
 
-      const data = await apiGet(
-        "/v1/catalogo/categorias"
-      );
-
-      setCategorias(
-        Array.isArray(data)
-          ? data
-          : data.content || data.items || []
-      );
+      await cargarCatalogo();
 
       setNuevaCategoria({
         nombre: "",
@@ -186,442 +284,456 @@ function Catalogo() {
 
       setError(
         error.message ||
-          "No fue posible crear la categoría."
+        "No fue posible crear la categoría."
       );
     }
   };
 
-  // =========================
-  // ACTUALIZAR CATEGORÍA
-  // =========================
+  /* =====================================================
+     ACTUALIZAR CATEGORÍA
+  ===================================================== */
 
-  const actualizarCategoria = async () => {
-    if (!categoriaEditando) {
-      return;
-    }
+  const actualizarCategoria =
+    async () => {
+      if (!categoriaEditando) {
+        return;
+      }
 
-    if (!nuevaCategoria.nombre.trim()) {
-      setError(
-        "El nombre de la categoría es obligatorio."
-      );
-      return;
-    }
+      if (
+        !nuevaCategoria.nombre.trim()
+      ) {
+        setError(
+          "El nombre de la categoría es obligatorio."
+        );
 
-    try {
-      setError("");
+        return;
+      }
 
-      await apiPut(
-        `/v1/catalogo/categorias/${categoriaEditando.id}`,
-        {
-          nombre: nuevaCategoria.nombre.trim(),
-          descripcion:
-            nuevaCategoria.descripcion.trim(),
-        }
-      );
+      try {
+        setError("");
 
-      const data = await apiGet(
-        "/v1/catalogo/categorias"
-      );
+        await apiPut(
+          `/v1/catalogo/categorias/${categoriaEditando.id}`,
+          {
+            nombre:
+              nuevaCategoria.nombre.trim(),
 
-      setCategorias(
-        Array.isArray(data)
-          ? data
-          : data.content || data.items || []
-      );
+            descripcion:
+              nuevaCategoria.descripcion.trim(),
+          }
+        );
 
-      setNuevaCategoria({
-        nombre: "",
-        descripcion: "",
-      });
+        await cargarCatalogo();
 
-      setCategoriaEditando(null);
-      setMostrarFormulario(false);
-    } catch (error) {
-      console.error(
-        "Error actualizando categoría:",
-        error
-      );
+        setNuevaCategoria({
+          nombre: "",
+          descripcion: "",
+        });
 
-      setError(
-        error.message ||
+        setCategoriaEditando(null);
+        setMostrarFormulario(false);
+      } catch (error) {
+        console.error(
+          "Error actualizando categoría:",
+          error
+        );
+
+        setError(
+          error.message ||
           "No fue posible actualizar la categoría."
-      );
-    }
-  };
+        );
+      }
+    };
 
-  // =========================
-  // ELIMINAR CATEGORÍA
-  // =========================
+  /* =====================================================
+     ELIMINAR CATEGORÍA
+  ===================================================== */
 
-  const eliminarCategoria = async (id) => {
-    const confirmar = window.confirm(
-      "¿Estás seguro de que deseas eliminar esta categoría?"
-    );
+  const eliminarCategoria =
+    async (id) => {
+      const confirmar =
+        window.confirm(
+          "¿Estás seguro de que deseas eliminar esta categoría?"
+        );
 
-    if (!confirmar) {
-      return;
-    }
+      if (!confirmar) {
+        return;
+      }
 
-    try {
-      setError("");
-      setEliminandoId(id);
+      try {
+        setError("");
+        setEliminandoId(id);
 
-      await apiDelete(
-        `/v1/catalogo/categorias/${id}`
-      );
+        await apiDelete(
+          `/v1/catalogo/categorias/${id}`
+        );
 
-      const data = await apiGet(
-        "/v1/catalogo/categorias"
-      );
+        await cargarCatalogo();
+      } catch (error) {
+        console.error(
+          "Error eliminando categoría:",
+          error
+        );
 
-      setCategorias(
-        Array.isArray(data)
-          ? data
-          : data.content || data.items || []
-      );
-    } catch (error) {
-      console.error(
-        "Error eliminando categoría:",
-        error
-      );
-
-      setError(
-        error.message ||
+        setError(
+          error.message ||
           "No fue posible eliminar la categoría."
-      );
-    } finally {
-      setEliminandoId(null);
-    }
-  };
+        );
+      } finally {
+        setEliminandoId(null);
+      }
+    };
 
-  // =========================
-  // CREAR PRIORIDAD
-  // =========================
+  /* =====================================================
+     CREAR PRIORIDAD
+  ===================================================== */
 
-  const crearPrioridad = async () => {
-    if (!nuevaPrioridad.nombre.trim()) {
-      setError(
-        "El nombre de la prioridad es obligatorio."
-      );
-      return;
-    }
+  const crearPrioridad =
+    async () => {
+      if (
+        !nuevaPrioridad.nombre.trim()
+      ) {
+        setError(
+          "El nombre de la prioridad es obligatorio."
+        );
 
-    const nivel = Number(nuevaPrioridad.nivel);
+        return;
+      }
 
-    if (!Number.isInteger(nivel) || nivel <= 0) {
-      setError(
-        "El nivel de la prioridad debe ser un número entero positivo."
-      );
-      return;
-    }
+      const nivel =
+        Number(
+          nuevaPrioridad.nivel
+        );
 
-    try {
-      setError("");
+      if (
+        !Number.isInteger(nivel) ||
+        nivel <= 0
+      ) {
+        setError(
+          "El nivel de la prioridad debe ser un número entero positivo."
+        );
 
-      await apiPost(
-        "/v1/catalogo/prioridades",
-        {
-          nombre: nuevaPrioridad.nombre.trim(),
-          nivel,
-        }
-      );
+        return;
+      }
 
-      const data = await apiGet(
-        "/v1/catalogo/prioridades"
-      );
+      try {
+        setError("");
 
-      setPrioridades(
-        Array.isArray(data)
-          ? data
-          : data.content || data.items || []
-      );
+        await apiPost(
+          "/v1/catalogo/prioridades",
+          {
+            nombre:
+              nuevaPrioridad.nombre.trim(),
 
-      setNuevaPrioridad({
-        nombre: "",
-        nivel: "",
-      });
-    } catch (error) {
-      console.error(
-        "Error creando prioridad:",
-        error
-      );
+            nivel,
+          }
+        );
 
-      setError(
-        error.message ||
-          "No fue posible crear la prioridad."
-      );
-    }
-  };
+        await cargarPrioridades();
 
-  // =========================
-  // ACTUALIZAR PRIORIDAD
-  // =========================
-
-  const actualizarPrioridad = async () => {
-    if (!prioridadEditando) {
-      return;
-    }
-
-    if (!nuevaPrioridad.nombre.trim()) {
-      setError(
-        "El nombre de la prioridad es obligatorio."
-      );
-      return;
-    }
-
-    const nivel = Number(nuevaPrioridad.nivel);
-
-    if (!Number.isInteger(nivel) || nivel <= 0) {
-      setError(
-        "El nivel de la prioridad debe ser un número entero positivo."
-      );
-      return;
-    }
-
-    try {
-      setError("");
-
-      await apiPut(
-        `/v1/catalogo/prioridades/${prioridadEditando.id}`,
-        {
-          nombre: nuevaPrioridad.nombre.trim(),
-          nivel,
-        }
-      );
-
-      const data = await apiGet(
-        "/v1/catalogo/prioridades"
-      );
-
-      setPrioridades(
-        Array.isArray(data)
-          ? data
-          : data.content || data.items || []
-      );
-
-      setNuevaPrioridad({
-        nombre: "",
-        nivel: "",
-      });
-
-      setPrioridadEditando(null);
-    } catch (error) {
-      console.error(
-        "Error actualizando prioridad:",
-        error
-      );
-
-      setError(
-        error.message ||
-          "No fue posible actualizar la prioridad."
-      );
-    }
-  };
-
-  // =========================
-  // ELIMINAR PRIORIDAD
-  // =========================
-
-  const eliminarPrioridad = async (id) => {
-    const confirmar = window.confirm(
-      "¿Estás seguro de que deseas eliminar esta prioridad?"
-    );
-
-    if (!confirmar) {
-      return;
-    }
-
-    try {
-      setError("");
-      setEliminandoId(id);
-
-      await apiDelete(
-        `/v1/catalogo/prioridades/${id}`
-      );
-
-      const data = await apiGet(
-        "/v1/catalogo/prioridades"
-      );
-
-      setPrioridades(
-        Array.isArray(data)
-          ? data
-          : data.content || data.items || []
-      );
-
-      if (prioridadEditando?.id === id) {
-        setPrioridadEditando(null);
         setNuevaPrioridad({
           nombre: "",
           nivel: "",
         });
-      }
-    } catch (error) {
-      console.error(
-        "Error eliminando prioridad:",
-        error
-      );
+      } catch (error) {
+        console.error(
+          "Error creando prioridad:",
+          error
+        );
 
-      setError(
-        error.message ||
+        setError(
+          error.message ||
+          "No fue posible crear la prioridad."
+        );
+      }
+    };
+
+  /* =====================================================
+     ACTUALIZAR PRIORIDAD
+  ===================================================== */
+
+  const actualizarPrioridad =
+    async () => {
+      if (!prioridadEditando) {
+        return;
+      }
+
+      if (
+        !nuevaPrioridad.nombre.trim()
+      ) {
+        setError(
+          "El nombre de la prioridad es obligatorio."
+        );
+
+        return;
+      }
+
+      const nivel =
+        Number(
+          nuevaPrioridad.nivel
+        );
+
+      if (
+        !Number.isInteger(nivel) ||
+        nivel <= 0
+      ) {
+        setError(
+          "El nivel de la prioridad debe ser un número entero positivo."
+        );
+
+        return;
+      }
+
+      try {
+        setError("");
+
+        await apiPut(
+          `/v1/catalogo/prioridades/${prioridadEditando.id}`,
+          {
+            nombre:
+              nuevaPrioridad.nombre.trim(),
+
+            nivel,
+          }
+        );
+
+        await cargarPrioridades();
+
+        setNuevaPrioridad({
+          nombre: "",
+          nivel: "",
+        });
+
+        setPrioridadEditando(null);
+      } catch (error) {
+        console.error(
+          "Error actualizando prioridad:",
+          error
+        );
+
+        setError(
+          error.message ||
+          "No fue posible actualizar la prioridad."
+        );
+      }
+    };
+
+  /* =====================================================
+     ELIMINAR PRIORIDAD
+  ===================================================== */
+
+  const eliminarPrioridad =
+    async (id) => {
+      const confirmar =
+        window.confirm(
+          "¿Estás seguro de que deseas eliminar esta prioridad?"
+        );
+
+      if (!confirmar) {
+        return;
+      }
+
+      try {
+        setError("");
+        setEliminandoId(id);
+
+        await apiDelete(
+          `/v1/catalogo/prioridades/${id}`
+        );
+
+        await cargarPrioridades();
+
+        if (
+          prioridadEditando?.id === id
+        ) {
+          setPrioridadEditando(null);
+
+          setNuevaPrioridad({
+            nombre: "",
+            nivel: "",
+          });
+        }
+      } catch (error) {
+        console.error(
+          "Error eliminando prioridad:",
+          error
+        );
+
+        setError(
+          error.message ||
           "No fue posible eliminar la prioridad."
-      );
-    } finally {
-      setEliminandoId(null);
-    }
+        );
+      } finally {
+        setEliminandoId(null);
+      }
+    };
+
+  /* =====================================================
+     NUEVA CATEGORÍA
+  ===================================================== */
+
+  const abrirNuevaCategoria = () => {
+    setCategoriaEditando(null);
+
+    setNuevaCategoria({
+      nombre: "",
+      descripcion: "",
+    });
+
+    setMostrarFormulario(true);
   };
 
-  // =========================
-  // RENDER
-  // =========================
+  /* =====================================================
+     INTERFAZ
+  ===================================================== */
 
   return (
-    <div className="catalogo-page">
+    <div
+      className="catalogo-page"
+      data-theme={theme}
+    >
 
-      {/* HEADER */}
-
-      <header className="page-header">
-
-        <div className="page-brand">
-
-          <button
-            type="button"
-            className="back-button"
-            onClick={() => navigate(-1)}
-          >
-            <span className="back-icon">
-              ←
-            </span>
-
-            <span>
-              Volver
-            </span>
-          </button>
-
-          <div className="page-brand-icon">
-            M
-          </div>
-
-          <div>
-            <h1>
-              MesaTech Cloud
-            </h1>
-
-            <span>
-              Gestión de soporte
-            </span>
-          </div>
-
-        </div>
-
-        <div className="page-user">
-
-          <span>
-            {account?.name}
-          </span>
-
-          <div className="page-avatar">
-            {account?.name
-              ?.charAt(0)
-              .toUpperCase()}
-          </div>
-
-        </div>
-
-      </header>
-
-      {/* CONTENIDO */}
+      <PageHeader
+        account={account}
+        setAccount={setAccount}
+        theme={theme}
+        setTheme={setTheme}
+        onBack={() =>
+          navigate(-1)
+        }
+      />
 
       <main className="catalogo-content">
 
-        {/* TÍTULO */}
+        {/* =================================================
+            HERO
+        ================================================= */}
 
-        <section className="page-title">
+        <section className="catalogo-hero">
 
-          <span>
-            CATÁLOGO
-          </span>
+          <div className="catalogo-hero-copy">
 
-          <h2>
-            Categorías de soporte
-          </h2>
+            <span className="catalogo-eyebrow">
+              CATÁLOGO
+            </span>
 
-          <p>
-            Consulta las categorías disponibles
-            para tus solicitudes.
-          </p>
+            <h2>
+              Categorías de soporte
+            </h2>
 
-          {!loadingRoles &&
-            esAdministrador && (
-              <button
-                type="button"
-                className="admin-catalog-button"
-                onClick={() =>
-                  setModoAdministracion(
-                    (prev) => !prev
-                  )
-                }
-              >
-                {modoAdministracion
-                  ? "Cerrar administración"
-                  : "Administrar catálogo"}
-              </button>
-            )}
+            <p>
+              Consulta las categorías disponibles
+              para registrar y organizar solicitudes
+              de soporte.
+            </p>
+
+          </div>
+
+          <div className="catalogo-hero-icon">
+            <BookOpen size={36} />
+          </div>
 
         </section>
 
-        {/* CARGANDO CATEGORÍAS */}
+        {/* =================================================
+            ADMIN TOOLBAR
+        ================================================= */}
 
-        {loading && (
-          <section className="catalogo-state">
+        {!loadingRoles &&
+          esAdministrador && (
 
-            <div className="loading-spinner"></div>
+            <section className="catalogo-admin-toolbar">
 
-            <p>
-              Cargando categorías...
-            </p>
+              <div>
 
-          </section>
-        )}
+                <Settings size={18} />
 
-        {/* ERROR */}
+                <div>
+                  <strong>
+                    Administración
+                  </strong>
 
-        {!loading && error && (
-          <section className="catalogo-state error-state">
+                  <span>
+                    Gestiona categorías y prioridades
+                  </span>
+                </div>
 
-            <div className="state-icon"></div>
+              </div>
 
-            <h3>
-              No fue posible cargar el catálogo
-            </h3>
+              <div className="catalogo-admin-actions">
 
-            <p>
+                {modoAdministracion && (
+
+                  <button
+                    type="button"
+                    className="catalogo-new-button"
+                    onClick={
+                      abrirNuevaCategoria
+                    }
+                  >
+                    <Plus size={17} />
+
+                    Nueva categoría
+                  </button>
+
+                )}
+
+                <button
+                  type="button"
+                  className="admin-catalog-button"
+                  onClick={() => {
+                    setModoAdministracion(
+                      (prev) => !prev
+                    );
+
+                    setMostrarFormulario(false);
+                    setCategoriaEditando(null);
+                  }}
+                >
+                  <SlidersHorizontal size={17} />
+
+                  {modoAdministracion
+                    ? "Cerrar administración"
+                    : "Administrar catálogo"}
+                </button>
+
+              </div>
+
+            </section>
+
+          )}
+
+        {/* =================================================
+            ERROR GENERAL
+        ================================================= */}
+
+        {error && !loading && (
+
+          <div className="catalogo-inline-error">
+
+            <AlertCircle size={18} />
+
+            <span>
               {error}
-            </p>
+            </span>
 
-            <button
-              className="primary-button"
-              onClick={() =>
-                window.location.reload()
-              }
-            >
-              Reintentar
-            </button>
+          </div>
 
-          </section>
         )}
 
-        {/* =========================
+        {/* =================================================
             FORMULARIO CATEGORÍA
-        ========================= */}
+        ================================================= */}
 
         {modoAdministracion &&
           mostrarFormulario && (
+
             <section className="admin-category-form">
 
               <div className="admin-form-header">
 
                 <div>
+
                   <span>
                     ADMINISTRACIÓN
                   </span>
@@ -631,6 +743,13 @@ function Catalogo() {
                       ? "Editar categoría"
                       : "Nueva categoría"}
                   </h3>
+
+                  <p>
+                    {categoriaEditando
+                      ? "Modifica los datos de la categoría seleccionada."
+                      : "Registra una nueva categoría de soporte."}
+                  </p>
+
                 </div>
 
                 <button
@@ -639,14 +758,19 @@ function Catalogo() {
                   onClick={() => {
                     setMostrarFormulario(false);
                     setCategoriaEditando(null);
+
+                    setNuevaCategoria({
+                      nombre: "",
+                      descripcion: "",
+                    });
                   }}
                 >
-                  ×
+                  <X size={19} />
                 </button>
 
               </div>
 
-              <div className="form-group">
+              <div className="catalogo-form-group">
 
                 <label htmlFor="nombreCategoria">
                   Nombre de la categoría
@@ -655,7 +779,9 @@ function Catalogo() {
                 <input
                   id="nombreCategoria"
                   type="text"
-                  value={nuevaCategoria.nombre}
+                  value={
+                    nuevaCategoria.nombre
+                  }
                   onChange={(e) =>
                     setNuevaCategoria(
                       (prev) => ({
@@ -670,7 +796,7 @@ function Catalogo() {
 
               </div>
 
-              <div className="form-group">
+              <div className="catalogo-form-group">
 
                 <label htmlFor="descripcionCategoria">
                   Descripción
@@ -696,34 +822,52 @@ function Catalogo() {
 
               </div>
 
-              <button
-                type="button"
-                className="primary-button"
-                onClick={
-                  categoriaEditando
-                    ? actualizarCategoria
-                    : crearCategoria
-                }
-              >
-                {categoriaEditando
-                  ? "Guardar cambios"
-                  : "Crear categoría"}
-              </button>
+              <div className="catalogo-form-actions">
+
+                <button
+                  type="button"
+                  className="catalogo-secondary-button"
+                  onClick={() => {
+                    setMostrarFormulario(false);
+                    setCategoriaEditando(null);
+                  }}
+                >
+                  Cancelar
+                </button>
+
+                <button
+                  type="button"
+                  className="catalogo-primary-button"
+                  onClick={
+                    categoriaEditando
+                      ? actualizarCategoria
+                      : crearCategoria
+                  }
+                >
+                  {categoriaEditando
+                    ? "Guardar cambios"
+                    : "Crear categoría"}
+                </button>
+
+              </div>
 
             </section>
+
           )}
 
-        {/* =========================
-            ADMINISTRACIÓN PRIORIDADES
-        ========================= */}
+        {/* =================================================
+            PRIORIDADES ADMIN
+        ================================================= */}
 
         {modoAdministracion &&
           esAdministrador && (
+
             <section className="admin-prioridades">
 
               <div className="admin-form-header">
 
                 <div>
+
                   <span>
                     ADMINISTRACIÓN
                   </span>
@@ -731,132 +875,133 @@ function Catalogo() {
                   <h3>
                     Prioridades
                   </h3>
+
+                  <p>
+                    Configura los niveles utilizados
+                    por las solicitudes.
+                  </p>
+
+                </div>
+
+              </div>
+
+              <div className="priority-form">
+
+                <div className="catalogo-form-group">
+
+                  <label htmlFor="nombrePrioridad">
+                    Nombre
+                  </label>
+
+                  <input
+                    id="nombrePrioridad"
+                    type="text"
+                    value={
+                      nuevaPrioridad.nombre
+                    }
+                    onChange={(e) =>
+                      setNuevaPrioridad(
+                        (prev) => ({
+                          ...prev,
+                          nombre:
+                            e.target.value,
+                        })
+                      )
+                    }
+                    placeholder="Ej: Alta"
+                  />
+
+                </div>
+
+                <div className="catalogo-form-group">
+
+                  <label htmlFor="nivelPrioridad">
+                    Nivel
+                  </label>
+
+                  <input
+                    id="nivelPrioridad"
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={
+                      nuevaPrioridad.nivel
+                    }
+                    onChange={(e) =>
+                      setNuevaPrioridad(
+                        (prev) => ({
+                          ...prev,
+                          nivel:
+                            e.target.value,
+                        })
+                      )
+                    }
+                    placeholder="Ej: 3"
+                  />
+
                 </div>
 
                 <button
                   type="button"
-                  className="primary-button"
-                  onClick={() => {
-                    setPrioridadEditando(null);
-
-                    setNuevaPrioridad({
-                      nombre: "",
-                      nivel: "",
-                    });
-                  }}
+                  className="catalogo-primary-button priority-submit"
+                  onClick={
+                    prioridadEditando
+                      ? actualizarPrioridad
+                      : crearPrioridad
+                  }
                 >
-                  Nueva prioridad
+                  {prioridadEditando
+                    ? "Guardar cambios"
+                    : "Crear prioridad"}
                 </button>
 
               </div>
 
-              {/* FORMULARIO PARA CREAR O EDITAR UNA PRIORIDAD */}
-
-              {modoAdministracion && (
-                  <div className="priority-form">
-
-                    <div className="form-group">
-
-                      <label htmlFor="nombrePrioridad">
-                        Nombre de la prioridad
-                      </label>
-
-                      <input
-                        id="nombrePrioridad"
-                        type="text"
-                        value={
-                          nuevaPrioridad.nombre
-                        }
-                        onChange={(e) =>
-                          setNuevaPrioridad(
-                            (prev) => ({
-                              ...prev,
-                              nombre:
-                                e.target.value,
-                            })
-                          )
-                        }
-                        placeholder="Ej: Alta"
-                      />
-
-                    </div>
-
-                    <div className="form-group">
-
-                      <label htmlFor="nivelPrioridad">
-                        Nivel
-                      </label>
-
-                      <input
-                        id="nivelPrioridad"
-                        type="number"
-                        min="1"
-                        step="1"
-                        value={
-                          nuevaPrioridad.nivel
-                        }
-                        onChange={(e) =>
-                          setNuevaPrioridad(
-                            (prev) => ({
-                              ...prev,
-                              nivel:
-                                e.target.value,
-                            })
-                          )
-                        }
-                        placeholder="Ej: 1"
-                      />
-
-                    </div>
-
-                    <button
-                      type="button"
-                      className="primary-button"
-                      onClick={
-                        prioridadEditando
-                          ? actualizarPrioridad
-                          : crearPrioridad
-                      }
-                    >
-                      {prioridadEditando
-                        ? "Guardar cambios"
-                        : "Crear prioridad"}
-                    </button>
-
-                  </div>
-                )}
-
-              {/* LISTA DE PRIORIDADES */}
-
               {loadingPrioridades ? (
-                <p>
+
+                <div className="catalogo-small-loading">
                   Cargando prioridades...
-                </p>
+                </div>
+
               ) : prioridades.length === 0 ? (
-                <p>
+
+                <div className="catalogo-small-loading">
                   No hay prioridades registradas.
-                </p>
+                </div>
+
               ) : (
+
                 <div className="priority-list">
 
                   {prioridades.map(
                     (prioridad) => (
+
                       <article
                         className="priority-item"
-                        key={prioridad.id}
+                        key={
+                          prioridad.id
+                        }
                       >
 
-                        <div>
+                        <div className="priority-info">
 
-                          <h4>
-                            {prioridad.nombre ||
-                              prioridad.name ||
-                              "Prioridad"}
-                          </h4>
+                          <div className="priority-icon">
+                            <SlidersHorizontal size={17} />
+                          </div>
 
-                          <p>
-                            Nivel: {prioridad.nivel}
-                          </p>
+                          <div>
+
+                            <h4>
+                              {prioridad.nombre ||
+                                prioridad.name ||
+                                "Prioridad"}
+                            </h4>
+
+                            <p>
+                              Nivel {prioridad.nivel}
+                            </p>
+
+                          </div>
 
                         </div>
 
@@ -875,12 +1020,15 @@ function Catalogo() {
                                   prioridad.nombre ||
                                   prioridad.name ||
                                   "",
+
                                 nivel:
                                   prioridad.nivel ||
                                   "",
                               });
                             }}
                           >
+                            <Pencil size={15} />
+
                             Editar
                           </button>
 
@@ -893,10 +1041,14 @@ function Catalogo() {
                               )
                             }
                             disabled={
-                              eliminandoId === prioridad.id
+                              eliminandoId ===
+                              prioridad.id
                             }
                           >
-                            {eliminandoId === prioridad.id
+                            <Trash2 size={15} />
+
+                            {eliminandoId ===
+                            prioridad.id
                               ? "Eliminando..."
                               : "Eliminar"}
                           </button>
@@ -904,25 +1056,94 @@ function Catalogo() {
                         </div>
 
                       </article>
+
                     )
                   )}
 
                 </div>
+
               )}
 
             </section>
+
           )}
 
-        {/* =========================
-            SIN CATEGORÍAS
-        ========================= */}
+        {/* =================================================
+            LOADING
+        ================================================= */}
+
+        {loading && (
+
+          <section className="catalogo-state">
+
+            <div className="catalogo-loading-spinner" />
+
+            <h3>
+              Cargando catálogo
+            </h3>
+
+            <p>
+              Estamos consultando las categorías
+              disponibles.
+            </p>
+
+          </section>
+
+        )}
+
+        {/* =================================================
+            ERROR
+        ================================================= */}
+
+        {!loading &&
+          error &&
+          categorias.length === 0 && (
+
+            <section className="catalogo-state">
+
+              <div className="catalogo-state-icon error">
+
+                <AlertCircle size={29} />
+
+              </div>
+
+              <h3>
+                No fue posible cargar el catálogo
+              </h3>
+
+              <p>
+                {error}
+              </p>
+
+              <button
+                type="button"
+                className="catalogo-primary-button"
+                onClick={
+                  cargarCatalogo
+                }
+              >
+                Reintentar
+              </button>
+
+            </section>
+
+          )}
+
+        {/* =================================================
+            VACÍO
+        ================================================= */}
 
         {!loading &&
           !error &&
           categorias.length === 0 && (
+
             <section className="catalogo-state">
 
-              <div className="state-icon"></div>
+              <div className="catalogo-state-icon">
+
+                <FolderOpen size={30} />
+
+              </div>
 
               <h3>
                 No hay categorías disponibles
@@ -934,111 +1155,154 @@ function Catalogo() {
               </p>
 
             </section>
+
           )}
 
-        {/* =========================
+        {/* =================================================
             CATEGORÍAS
-        ========================= */}
+        ================================================= */}
 
         {!loading &&
-          !error &&
           categorias.length > 0 && (
-            <section className="category-grid">
 
-              {categorias.map(
-                (categoria) => (
-                  <article
-                    className="category-card"
-                    key={
-                      categoria.id ||
-                      categoria.codigo ||
-                      categoria.nombre
-                    }
-                  >
+            <section className="catalogo-section">
 
-                    <div className="category-icon"></div>
+              <div className="catalogo-section-header">
 
-                    <div className="category-content">
+                <div>
 
-                      <h3>
-                        {categoria.nombre ||
-                          categoria.name ||
-                          categoria.descripcion ||
-                          "Categoría"}
-                      </h3>
+                  <span>
+                    DISPONIBLES
+                  </span>
 
-                      <p>
-                        {categoria.descripcion ||
-                          categoria.description ||
-                          "Categoría disponible para solicitudes de soporte."}
-                      </p>
+                  <h3>
+                    Categorías
+                  </h3>
 
-                    </div>
+                </div>
 
-                    {modoAdministracion &&
-                      esAdministrador && (
-                        <div className="category-actions">
+                <strong>
+                  {categorias.length}
+                </strong>
 
-                          <button
-                            type="button"
-                            className="edit-category-button"
-                            onClick={() => {
-                              setCategoriaEditando(
-                                categoria
-                              );
+              </div>
 
-                              setNuevaCategoria({
-                                nombre:
-                                  categoria.nombre ||
-                                  categoria.name ||
-                                  "",
-                                descripcion:
-                                  categoria.descripcion ||
-                                  categoria.description ||
-                                  "",
-                              });
+              <div className="catalogo-category-grid">
 
-                              setMostrarFormulario(
-                                true
-                              );
-                            }}
-                          >
-                            Editar
-                          </button>
+                {categorias.map(
+                  (categoria) => (
 
-                          <button
-                            type="button"
-                            className="delete-category-button"
-                            onClick={() =>
-                              eliminarCategoria(
+                    <article
+                      className="catalogo-category-card"
+                      key={
+                        categoria.id ||
+                        categoria.codigo ||
+                        categoria.nombre
+                      }
+                    >
+
+                      <div className="catalogo-category-icon">
+
+                        <BookOpen size={24} />
+
+                      </div>
+
+                      <div className="catalogo-category-content">
+
+                        <h3>
+                          {categoria.nombre ||
+                            categoria.name ||
+                            categoria.descripcion ||
+                            "Categoría"}
+                        </h3>
+
+                        <p>
+                          {categoria.descripcion ||
+                            categoria.description ||
+                            "Categoría disponible para solicitudes de soporte."}
+                        </p>
+
+                      </div>
+
+                      {modoAdministracion &&
+                        esAdministrador && (
+
+                          <div className="category-actions">
+
+                            <button
+                              type="button"
+                              className="edit-category-button"
+                              onClick={() => {
+                                setCategoriaEditando(
+                                  categoria
+                                );
+
+                                setNuevaCategoria({
+                                  nombre:
+                                    categoria.nombre ||
+                                    categoria.name ||
+                                    "",
+
+                                  descripcion:
+                                    categoria.descripcion ||
+                                    categoria.description ||
+                                    "",
+                                });
+
+                                setMostrarFormulario(
+                                  true
+                                );
+                              }}
+                            >
+                              <Pencil size={15} />
+
+                              Editar
+                            </button>
+
+                            <button
+                              type="button"
+                              className="delete-category-button"
+                              onClick={() =>
+                                eliminarCategoria(
+                                  categoria.id
+                                )
+                              }
+                              disabled={
+                                eliminandoId ===
                                 categoria.id
-                              )
-                            }
-                            disabled={
-                              eliminandoId ===
+                              }
+                            >
+                              <Trash2 size={15} />
+
+                              {eliminandoId ===
                               categoria.id
-                            }
-                          >
-                            {eliminandoId ===
-                            categoria.id
-                              ? "Eliminando..."
-                              : "Eliminar"}
-                          </button>
+                                ? "Eliminando..."
+                                : "Eliminar"}
+                            </button>
 
-                        </div>
-                      )}
+                          </div>
 
-                  </article>
-                )
-              )}
+                        )}
+
+                    </article>
+
+                  )
+                )}
+
+              </div>
 
             </section>
+
           )}
 
       </main>
 
-      <footer className="developer-signature">
-        Desarrollado por Alexis Poblete, Damian Villanueva y Francisco Vásquez | Sistema creado para la asignatura de Desarrollo Cloud Native 2026
+      <footer className="catalogo-footer">
+
+        Desarrollado por Alexis Poblete y Damian Villanueva
+        {" | "}
+        Desarrollo Cloud Native 2026
+
       </footer>
 
     </div>

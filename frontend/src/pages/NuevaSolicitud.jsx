@@ -1,260 +1,401 @@
-import {useEffect,useState,} from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
-import {apiGet,apiPost,} from "../services/api";
+
+import {
+  FilePlus2,
+  Send,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
+
+import {
+  apiGet,
+  apiPost,
+} from "../services/api";
+
+import PageHeader from "../components/PageHeader";
+
 import "./NuevaSolicitud.css";
 
 function NuevaSolicitud() {
   const navigate = useNavigate();
-  const { accounts } = useMsal();
 
-  const account = accounts[0];
+  const {
+    instance,
+    accounts,
+  } = useMsal();
 
-  const [formulario, setFormulario] = useState({
+  /* =====================================================
+     CUENTA ACTIVA
+  ===================================================== */
+
+  const [account, setAccount] = useState(() =>
+    instance.getActiveAccount() ||
+    accounts[0] ||
+    null
+  );
+
+  /* =====================================================
+     TEMA
+  ===================================================== */
+
+  const [theme, setTheme] = useState(() => {
+    const savedTheme =
+      localStorage.getItem(
+        "mesatech-theme"
+      );
+
+    if (
+      savedTheme === "light" ||
+      savedTheme === "dark"
+    ) {
+      return savedTheme;
+    }
+
+    return "dark";
+  });
+
+  useEffect(() => {
+    localStorage.setItem(
+      "mesatech-theme",
+      theme
+    );
+  }, [theme]);
+
+  /* =====================================================
+     FORMULARIO
+  ===================================================== */
+
+  const [
+    formulario,
+    setFormulario,
+  ] = useState({
     titulo: "",
     descripcion: "",
     categoriaId: "",
     prioridadId: "2",
   });
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [categorias, setCategorias] = useState([]);
-  const [loadingCategorias, setLoadingCategorias] = useState(true);
-  const [prioridades, setPrioridades] = useState([]);
-const [loadingPrioridades, setLoadingPrioridades] = useState(true);
-useEffect(() => {
-  const cargarCategorias = async () => {
-    try {
-      setLoadingCategorias(true);
+  const [
+    loading,
+    setLoading,
+  ] = useState(false);
 
-      const data = await apiGet(
-          "/v1/solicitudes/categorias"
+  const [
+    error,
+    setError,
+  ] = useState("");
+
+  const [
+    success,
+    setSuccess,
+  ] = useState("");
+
+  /* =====================================================
+     CATEGORÍAS
+  ===================================================== */
+
+  const [
+    categorias,
+    setCategorias,
+  ] = useState([]);
+
+  const [
+    loadingCategorias,
+    setLoadingCategorias,
+  ] = useState(true);
+
+  /* =====================================================
+     PRIORIDADES
+  ===================================================== */
+
+  const [
+    prioridades,
+    setPrioridades,
+  ] = useState([]);
+
+  const [
+    loadingPrioridades,
+    setLoadingPrioridades,
+  ] = useState(true);
+
+  /* =====================================================
+     CARGAR CATEGORÍAS
+  ===================================================== */
+
+  useEffect(() => {
+    const cargarCategorias =
+      async () => {
+        try {
+          setLoadingCategorias(true);
+
+          const data =
+            await apiGet(
+              "/v1/solicitudes/categorias"
+            );
+
+          setCategorias(
+            Array.isArray(data)
+              ? data
+              : data.content ||
+                data.items ||
+                []
+          );
+        } catch (error) {
+          console.error(
+            "Error cargando categorías:",
+            error
           );
 
-      setCategorias(
-        Array.isArray(data)
-          ? data
-          : data.content || data.items || []
-      );
+          setError(
+            "No fue posible cargar las categorías."
+          );
+        } finally {
+          setLoadingCategorias(false);
+        }
+      };
 
-    } catch (error) {
-      console.error(
-        "Error cargando categorías:",
-        error
-      );
+    cargarCategorias();
+  }, []);
 
-      setError(
-        "No fue posible cargar las categorías."
-      );
+  /* =====================================================
+     CARGAR PRIORIDADES
+  ===================================================== */
 
-    } finally {
-      setLoadingCategorias(false);
-    }
-  };
+  useEffect(() => {
+    const cargarPrioridades =
+      async () => {
+        try {
+          setLoadingPrioridades(true);
 
-  cargarCategorias();
-}, []);
-useEffect(() => {
-  const cargarPrioridades = async () => {
-    try {
-      setLoadingPrioridades(true);
+          const data =
+            await apiGet(
+              "/v1/catalogo/prioridades"
+            );
 
-      const data = await apiGet(
-        "/v1/catalogo/prioridades"
-      );
+          setPrioridades(
+            Array.isArray(data)
+              ? data
+              : data.content ||
+                data.items ||
+                []
+          );
+        } catch (error) {
+          console.error(
+            "Error cargando prioridades:",
+            error
+          );
 
-      setPrioridades(
-        Array.isArray(data)
-          ? data
-          : data.content || data.items || []
-      );
+          setError(
+            "No fue posible cargar las prioridades."
+          );
+        } finally {
+          setLoadingPrioridades(false);
+        }
+      };
 
-    } catch (error) {
-      console.error(
-        "Error cargando prioridades:",
-        error
-      );
+    cargarPrioridades();
+  }, []);
 
-      setError(
-        "No fue posible cargar las prioridades."
-      );
+  /* =====================================================
+     CAMBIOS FORMULARIO
+  ===================================================== */
 
-    } finally {
-      setLoadingPrioridades(false);
-    }
-  };
-
-  cargarPrioridades();
-}, []);
   const handleChange = (event) => {
-    const { name, value } = event.target;
+    const {
+      name,
+      value,
+    } = event.target;
 
-    setFormulario((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormulario(
+      (prev) => ({
+        ...prev,
+        [name]: value,
+      })
+    );
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  /* =====================================================
+     CREAR SOLICITUD
+  ===================================================== */
 
-    setError("");
-    setSuccess("");
+  const handleSubmit =
+    async (event) => {
+      event.preventDefault();
 
-    if (!formulario.titulo.trim()) {
-      setError("Debes ingresar un título.");
-      return;
-    }
+      setError("");
+      setSuccess("");
 
-    if (!formulario.descripcion.trim()) {
-      setError("Debes ingresar una descripción.");
-      return;
-    }
+      if (
+        !formulario.titulo.trim()
+      ) {
+        setError(
+          "Debes ingresar un título."
+        );
 
-    if (!formulario.categoriaId) {
-      setError("Debes seleccionar una categoría.");
-      return;
-    }
-    if (!formulario.prioridadId) {
-  setError("Debes seleccionar una prioridad.");
-  return;
-}
+        return;
+      }
 
-    try {
-      setLoading(true);
+      if (
+        !formulario.descripcion.trim()
+      ) {
+        setError(
+          "Debes ingresar una descripción."
+        );
 
-      const solicitud = await apiPost(
-        "/v1/solicitudes",
-        formulario
-      );
+        return;
+      }
 
-      console.log(
-        "Solicitud creada:",
-        solicitud
-      );
+      if (
+        !formulario.categoriaId
+      ) {
+        setError(
+          "Debes seleccionar una categoría."
+        );
 
-      setSuccess(
-        "La solicitud fue creada correctamente."
-      );
-setFormulario({
-  titulo: "",
-  descripcion: "",
-  categoriaId: "",
-  prioridadId: "",
-});
+        return;
+      }
 
-    } catch (error) {
-      console.error(
-        "Error creando solicitud:",
-        error
-      );
+      if (
+        !formulario.prioridadId
+      ) {
+        setError(
+          "Debes seleccionar una prioridad."
+        );
 
-      setError(
-        "No fue posible crear la solicitud."
-      );
+        return;
+      }
 
-    } finally {
-      setLoading(false);
-    }
-  };
+      try {
+        setLoading(true);
+
+        const solicitud =
+          await apiPost(
+            "/v1/solicitudes",
+            formulario
+          );
+
+        console.log(
+          "Solicitud creada:",
+          solicitud
+        );
+
+        setSuccess(
+          "La solicitud fue creada correctamente."
+        );
+
+        setFormulario({
+          titulo: "",
+          descripcion: "",
+          categoriaId: "",
+          prioridadId: "2",
+        });
+      } catch (error) {
+        console.error(
+          "Error creando solicitud:",
+          error
+        );
+
+        setError(
+          "No fue posible crear la solicitud."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+  /* =====================================================
+     INTERFAZ
+  ===================================================== */
 
   return (
-    <div className="nueva-solicitud-page">
+    <div
+      className="nueva-solicitud-page"
+      data-theme={theme}
+    >
 
-      {/* HEADER */}
-
-      <header className="page-header">
-
-        <div className="page-brand">
-          <button
-  type="button"
-  className="back-button"
-  onClick={() => navigate(-1)}
->
-  <span className="back-icon">←</span>
-  <span>Volver</span>
-</button>
-
-          <div className="page-brand-icon">
-            M
-          </div>
-
-          <div>
-            <h1>MesaTech Cloud</h1>
-            <span>Gestión de soporte</span>
-          </div>
-          
-
-        </div>
-
-        <div className="page-user">
-
-          <span>
-            {account?.name}
-          </span>
-
-          <div className="page-avatar">
-            {account?.name
-              ?.charAt(0)
-              .toUpperCase()}
-          </div>
-
-        </div>
-
-      </header>
-
-
-      {/* CONTENIDO */}
+      <PageHeader
+        account={account}
+        setAccount={setAccount}
+        theme={theme}
+        setTheme={setTheme}
+        onBack={() =>
+          navigate(-1)
+        }
+      />
 
       <main className="nueva-solicitud-content">
 
-      
+        {/* =================================================
+            HERO
+        ================================================= */}
 
+        <section className="nueva-solicitud-hero">
 
-        <section className="page-title">
+          <div className="nueva-solicitud-hero-copy">
 
-          <span>
-            SOLICITUDES
-          </span>
+            <span className="nueva-solicitud-eyebrow">
+              CREAR SOLICITUD
+            </span>
 
-          <h2>
-            Nueva solicitud
-          </h2>
+            <h2>
+              Nueva solicitud
+            </h2>
 
-          <p>
-            Registra una nueva solicitud de soporte.
-          </p>
+            <p>
+              Registra un nuevo requerimiento de soporte y selecciona su categoría y prioridad.
+            </p>
+
+          </div>
+
+          <div className="nueva-solicitud-hero-icon">
+            <FilePlus2 size={36} />
+          </div>
 
         </section>
 
+        {/* =================================================
+            FORMULARIO
+        ================================================= */}
 
-        {/* FORMULARIO */}
+        <section className="nueva-solicitud-form-card">
 
-        <section className="form-card">
+          <form
+            onSubmit={
+              handleSubmit
+            }
+          >
 
-          <form onSubmit={handleSubmit}>
+            <div className="nueva-solicitud-form-header">
 
-            <div className="form-section">
+              <div>
 
-              <h3>
-                Información de la solicitud
-              </h3>
+                <span>
+                  INFORMACIÓN
+                </span>
 
-              <p>
-                Completa los datos necesarios
-                para registrar tu solicitud.
-              </p>
+                <h3>
+                  Datos de la solicitud
+                </h3>
+
+                <p>
+                  Completa los datos necesarios para registrar tu solicitud.
+                </p>
+
+              </div>
 
             </div>
 
+            {/* =================================================
+                TÍTULO
+            ================================================= */}
 
-            {/* TÍTULO */}
+            <div className="nueva-solicitud-form-group">
 
-            <div className="form-group">
-
-              <label htmlFor="titulo">
+              <label
+                htmlFor="titulo"
+              >
                 Título
               </label>
 
@@ -262,149 +403,243 @@ setFormulario({
                 id="titulo"
                 name="titulo"
                 type="text"
-                value={formulario.titulo}
-                onChange={handleChange}
+                value={
+                  formulario.titulo
+                }
+                onChange={
+                  handleChange
+                }
                 placeholder="Ej: Problema con mi computador"
-                disabled={loading}
+                disabled={
+                  loading
+                }
               />
 
             </div>
 
+            {/* =================================================
+                DESCRIPCIÓN
+            ================================================= */}
 
-            {/* DESCRIPCIÓN */}
+            <div className="nueva-solicitud-form-group">
 
-            <div className="form-group">
-
-              <label htmlFor="descripcion">
+              <label
+                htmlFor="descripcion"
+              >
                 Descripción
               </label>
 
               <textarea
                 id="descripcion"
                 name="descripcion"
-                value={formulario.descripcion}
-                onChange={handleChange}
+                value={
+                  formulario.descripcion
+                }
+                onChange={
+                  handleChange
+                }
                 placeholder="Describe detalladamente el problema..."
                 rows="5"
-                disabled={loading}
+                disabled={
+                  loading
+                }
               />
 
             </div>
 
+            {/* =================================================
+                SELECTORES
+            ================================================= */}
 
-            <div className="form-row">
+            <div className="nueva-solicitud-form-row">
 
-              {/* CATEGORÍA */}
+              <div className="nueva-solicitud-form-group">
 
-              <div className="form-group">
-
-                <label htmlFor="categoria">
+                <label
+                  htmlFor="categoriaId"
+                >
                   Categoría
                 </label>
 
                 <select
-  id="categoriaId"
-  name="categoriaId"
-  value={formulario.categoriaId}
-  onChange={handleChange}
-  disabled={loading || loadingCategorias}
->
-  <option value="">
-    {loadingCategorias
-      ? "Cargando categorías..."
-      : "Selecciona una categoría"}
-  </option>
+                  id="categoriaId"
+                  name="categoriaId"
+                  value={
+                    formulario.categoriaId
+                  }
+                  onChange={
+                    handleChange
+                  }
+                  disabled={
+                    loading ||
+                    loadingCategorias
+                  }
+                >
 
-  {categorias.map((categoria) => (
-    <option
-      key={categoria.id}
-      value={categoria.id}
-    >
-      {categoria.nombre ||
-        categoria.name ||
-        categoria.descripcion ||
-        "Categoría"}
-    </option>
-  ))}
-</select>
+                  <option value="">
+
+                    {loadingCategorias
+                      ? "Cargando categorías..."
+                      : "Selecciona una categoría"}
+
+                  </option>
+
+                  {categorias.map(
+                    (categoria) => (
+
+                      <option
+                        key={
+                          categoria.id
+                        }
+                        value={
+                          categoria.id
+                        }
+                      >
+
+                        {categoria.nombre ||
+                          categoria.name ||
+                          categoria.descripcion ||
+                          "Categoría"}
+
+                      </option>
+
+                    )
+                  )}
+
+                </select>
+
               </div>
 
+              <div className="nueva-solicitud-form-group">
 
-              {/* PRIORIDAD */}
-
-              <div className="form-group">
-
-                <label htmlFor="prioridad">
+                <label
+                  htmlFor="prioridadId"
+                >
                   Prioridad
                 </label>
 
-              <select
-  id="prioridadId"
-  name="prioridadId"
-  value={formulario.prioridadId}
-  onChange={handleChange}
-  disabled={loading || loadingPrioridades}
->
-  <option value="">
-    {loadingPrioridades
-      ? "Cargando prioridades..."
-      : "Selecciona una prioridad"}
-  </option>
+                <select
+                  id="prioridadId"
+                  name="prioridadId"
+                  value={
+                    formulario.prioridadId
+                  }
+                  onChange={
+                    handleChange
+                  }
+                  disabled={
+                    loading ||
+                    loadingPrioridades
+                  }
+                >
 
-  {prioridades.map((prioridad) => (
-    <option
-      key={prioridad.id}
-      value={prioridad.id}
-    >
-      {prioridad.nombre ||
-        prioridad.name ||
-        prioridad.descripcion ||
-        "Prioridad"}
-    </option>
-  ))}
-</select>
+                  <option value="">
+
+                    {loadingPrioridades
+                      ? "Cargando prioridades..."
+                      : "Selecciona una prioridad"}
+
+                  </option>
+
+                  {prioridades.map(
+                    (prioridad) => (
+
+                      <option
+                        key={
+                          prioridad.id
+                        }
+                        value={
+                          prioridad.id
+                        }
+                      >
+
+                        {prioridad.nombre ||
+                          prioridad.name ||
+                          prioridad.descripcion ||
+                          "Prioridad"}
+
+                      </option>
+
+                    )
+                  )}
+
+                </select>
 
               </div>
 
             </div>
 
-
-            {/* MENSAJES */}
+            {/* =================================================
+                MENSAJES
+            ================================================= */}
 
             {error && (
-              <div className="form-message error">
-                 {error}
+
+              <div className="nueva-solicitud-message error">
+
+                <AlertCircle size={18} />
+
+                <span>
+                  {error}
+                </span>
+
               </div>
+
             )}
 
             {success && (
-              <div className="form-message success">
-                 {success}
+
+              <div className="nueva-solicitud-message success">
+
+                <CheckCircle2 size={18} />
+
+                <span>
+                  {success}
+                </span>
+
               </div>
+
             )}
 
+            {/* =================================================
+                ACCIONES
+            ================================================= */}
 
-            {/* BOTONES */}
-
-            <div className="form-actions">
+            <div className="nueva-solicitud-form-actions">
 
               <button
                 type="button"
-                className="secondary-button"
-                onClick={() => navigate("/solicitudes")}
-                disabled={loading}
+                className="nueva-solicitud-secondary-button"
+                onClick={() =>
+                  navigate(
+                    "/solicitudes"
+                  )
+                }
+                disabled={
+                  loading
+                }
               >
                 Cancelar
               </button>
 
               <button
                 type="submit"
-                className="primary-button"
-                disabled={loading}
+                className="nueva-solicitud-primary-button"
+                disabled={
+                  loading
+                }
               >
-                {loading
-                  ? "Creando solicitud..."
-                  : "Crear solicitud"}
+
+                <Send size={17} />
+
+                <span>
+
+                  {loading
+                    ? "Creando solicitud..."
+                    : "Crear solicitud"}
+
+                </span>
+
               </button>
 
             </div>
@@ -414,11 +649,14 @@ setFormulario({
         </section>
 
       </main>
-       <footer className="developer-signature">
 
-          Desarrollado por Alexis Poblete, Damian Villanueva y Francisco Vásquez | Sistema creado para la asignatura de Desarrollo Cloud Native 2026
+      <footer className="nueva-solicitud-footer">
 
-        </footer>
+        Desarrollado por Alexis Poblete y Damian Villanueva
+        {" | "}
+        Desarrollo Cloud Native 2026
+
+      </footer>
 
     </div>
   );
