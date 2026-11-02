@@ -1,8 +1,15 @@
+import { useEffect, useState } from "react";
 import { useMsal } from "@azure/msal-react";
+import { InteractionStatus } from "@azure/msal-browser";
 import { useNavigate } from "react-router-dom";
 import { useUserRoles } from "../hooks/useUserRoles";
+import { loginRequest } from "../auth/msalConfig";
 import "./Home.css";
+
+import logo from "../assets/mesatech-logo.png";
+
 import {
+  Home as HomeIcon,
   ClipboardList,
   PlusCircle,
   BookOpen,
@@ -10,441 +17,1131 @@ import {
   MonitorCog,
   Network,
   KeyRound,
-  LogOut
+  LogOut,
+  Settings,
+  Sun,
+  Moon,
+  Bell,
+  ChevronDown,
+  Clock3,
+  CheckCircle2,
+  BarChart3,
+  UserRoundCog,
+  Menu,
+  X,
 } from "lucide-react";
-import { useState } from "react";
+
 
 function Home() {
-    const [showProfileMenu, setShowProfileMenu] = useState(false);
-    const { instance, accounts } = useMsal();
-    const navigate = useNavigate();
 
-    const account = accounts[0];
+  const {
+    instance,
+    accounts,
+    inProgress,
+  } = useMsal();
 
-    const {
-      esCliente,
-      esOperador,
-      esAdministrador,
-    } = useUserRoles();
+  const navigate = useNavigate();
 
-    const handleLogout = () => {
-        instance.logoutRedirect({
-        account: account,
-        postLogoutRedirectUri: "/"
-        });
-    };
+
+  /* =====================================================
+     CUENTA ACTIVA
+  ===================================================== */
+
+  const [account, setAccount] = useState(() =>
+    instance.getActiveAccount() ||
+    accounts[0] ||
+    null
+  );
+
+
+  const {
+    esCliente,
+    esOperador,
+    esAdministrador,
+  } = useUserRoles(account);
+
+
   const nombre =
     account?.name || "Usuario";
 
   const correo =
     account?.username || "Sin correo";
 
+  const primerNombre =
+    nombre.split(" ")[0];
+
+
+  const rol =
+    esAdministrador
+      ? "Administrador"
+      : esOperador
+        ? "Operador"
+        : esCliente
+          ? "Cliente"
+          : "Usuario";
+
+
+  /* =====================================================
+     PERFIL
+  ===================================================== */
+
+  const [showProfileMenu, setShowProfileMenu] =
+    useState(false);
+
+
+  /* =====================================================
+     SIDEBAR
+  ===================================================== */
+
+  const [sidebarOpen, setSidebarOpen] =
+    useState(false);
+
+
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+  };
+
+
+  const goTo = (route) => {
+
+    navigate(route);
+
+    closeSidebar();
+
+  };
+
+
+  /*
+   * Cerrar sidebar con ESC.
+   */
+  useEffect(() => {
+
+    const handleKeyDown = (event) => {
+
+      if (
+        event.key === "Escape" &&
+        sidebarOpen
+      ) {
+        setSidebarOpen(false);
+      }
+
+    };
+
+    window.addEventListener(
+      "keydown",
+      handleKeyDown
+    );
+
+    return () => {
+
+      window.removeEventListener(
+        "keydown",
+        handleKeyDown
+      );
+
+    };
+
+  }, [sidebarOpen]);
+
+
+  /*
+   * Evitar scroll del fondo cuando
+   * el menú lateral está abierto.
+   */
+  useEffect(() => {
+
+    if (sidebarOpen) {
+
+      document.body.style.overflow =
+        "hidden";
+
+    } else {
+
+      document.body.style.overflow =
+        "";
+
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+
+  }, [sidebarOpen]);
+
+
+  /* =====================================================
+     TEMA LIGHT / DARK
+  ===================================================== */
+
+  const [theme, setTheme] = useState(() => {
+
+    const savedTheme =
+      localStorage.getItem(
+        "mesatech-theme"
+      );
+
+
+    if (
+      savedTheme === "light" ||
+      savedTheme === "dark"
+    ) {
+
+      return savedTheme;
+
+    }
+
+
+    return "light";
+
+  });
+
+
+  useEffect(() => {
+
+    localStorage.setItem(
+      "mesatech-theme",
+      theme
+    );
+
+  }, [theme]);
+
+
+  const toggleTheme = () => {
+
+    setTheme((currentTheme) =>
+      currentTheme === "light"
+        ? "dark"
+        : "light"
+    );
+
+  };
+
+
+  /* =====================================================
+     LOGOUT
+  ===================================================== */
+
+  const handleLogout = async () => {
+
+    if (
+      inProgress !==
+      InteractionStatus.None
+    ) {
+      return;
+    }
+
+
+    setShowProfileMenu(false);
+    setSidebarOpen(false);
+
+
+    try {
+
+      await instance.logoutPopup({
+        mainWindowRedirectUri: "/",
+      });
+
+    } catch (error) {
+
+      console.error(
+        "Error al cerrar sesión:",
+        error
+      );
+
+    }
+
+  };
+
+
+  /* =====================================================
+     CAMBIAR USUARIO
+  ===================================================== */
+
+  const handleSwitchAccount =
+    async () => {
+
+      if (
+        inProgress !==
+        InteractionStatus.None
+      ) {
+        return;
+      }
+
+
+      setShowProfileMenu(false);
+
+
+      try {
+
+        const response =
+          await instance.loginPopup({
+            ...loginRequest,
+            prompt: "select_account",
+          });
+
+
+        if (!response?.account) {
+          return;
+        }
+
+
+        /*
+         * Cuenta activa para MSAL.
+         */
+        instance.setActiveAccount(
+          response.account
+        );
+
+
+        /*
+         * Cuenta activa para React.
+         */
+        setAccount(
+          response.account
+        );
+
+
+      } catch (error) {
+
+        console.error(
+          "Error al cambiar de usuario:",
+          error
+        );
+
+      }
+
+    };
+
+
+  /* =====================================================
+     INTERFAZ
+  ===================================================== */
+
   return (
-    <div className="home-page">
 
-      {/* 
-          HEADER
-       */}
+    <div
+      className="dashboard-page"
+      data-theme={theme}
+    >
 
-      <header className="home-header">
+      {/* =================================================
+          SIDEBAR DRAWER
+      ================================================= */}
 
-        <div className="brand">
-          <div className="brand-icon">
-            M
-          </div>
+      <aside
+        className={
+          sidebarOpen
+            ? "dashboard-sidebar open"
+            : "dashboard-sidebar"
+        }
+      >
 
-          <div>
-            <h1>MesaTech Cloud</h1>
-            <span>Gestión de soporte</span>
-          </div>
+
+        {/* CERRAR */}
+
+        <button
+          type="button"
+          className="sidebar-close-button"
+          onClick={closeSidebar}
+          aria-label="Cerrar menú"
+        >
+
+          <X size={22}/>
+
+        </button>
+
+
+        {/* LOGO */}
+
+        <div className="sidebar-brand">
+
+          <img
+            src={logo}
+            alt="MesaTech Cloud"
+          />
+
         </div>
-      
 
 
-       <div className="profile-container">
+        {/* NAVEGACIÓN */}
 
-         <button
-           className="user-area"
-           onClick={() =>
-             setShowProfileMenu(!showProfileMenu)
-           }
-         >
-
-           <div className="user-info">
-
-             <strong>
-               {nombre}
-             </strong>
-
-             <span>
-               {correo}
-             </span>
-
-           </div>
-
-           <div className="user-avatar">
-             {nombre.charAt(0).toUpperCase()}
-           </div>
-
-         </button>
+        <nav className="sidebar-navigation">
 
 
-         {showProfileMenu && (
+          <button
+            type="button"
+            className="sidebar-item active"
+            onClick={() =>
+              goTo("/home")
+            }
+          >
 
-           <div className="profile-menu">
+            <HomeIcon size={21}/>
 
-             <div className="profile-menu-info">
-
-               <strong>
-                 {nombre}
-               </strong>
-
-               <span>
-                 {correo}
-               </span>
-
-             </div>
-
-
-             <div className="profile-menu-divider"></div>
-
-
-         <button
-           className="logout-button"
-           onClick={handleLogout}
-         >
-           <LogOut size={18} />
-
-           <span>
-             Cerrar sesión
-           </span>
-         </button>
-
-           </div>
-
-         )}
-
-       </div>
-
-      </header>
-
-
-      {/* 
-          CONTENIDO
-       */}
-
-      <main className="home-content">
-
-        {/* BIENVENIDA */}
-
-        <section className="welcome-section">
-
-          <div>
-
-            <span className="welcome-label">
-              PANEL PRINCIPAL
+            <span>
+              Inicio
             </span>
 
-            <h2>
-              Hola, {nombre.split(" ")[0]} 
-            </h2>
-
-            <p className="user-role">
-              Rol: {esAdministrador
-                ? "Administrador"
-                : esOperador
-                  ? "Operador"
-                  : esCliente
-                    ? "Cliente"
-                    : "Usuario"}
-            </p>
-
-            <p>
-              Gestiona tus solicitudes de soporte
-              de manera rápida y sencilla.
-            </p>
-
-          </div>
-
-        </section>
+          </button>
 
 
-        {/*
-            ACCIONES
-         */}
+          <button
+            type="button"
+            className="sidebar-item"
+            onClick={() =>
+              goTo("/solicitudes")
+            }
+          >
 
-        <section className="actions-section">
+            <ClipboardList size={21}/>
 
-          <h3>
-            ¿Qué deseas hacer?
-          </h3>
+            <span>
+              Solicitudes
+            </span>
 
-          <div className="action-grid">
+          </button>
 
 
-            {/* MIS SOLICITUDES */}
+          <button
+            type="button"
+            className="sidebar-item"
+            onClick={() =>
+              goTo("/nueva-solicitud")
+            }
+          >
 
-            {esCliente && (
-              <button
-                className="action-card"
-                onClick={() =>
-                  navigate("/solicitudes")
-                }
-              >
-                <div className="action-icon blue">
-                  <ClipboardList size={24} strokeWidth={1.8} />
-                </div>
+            <PlusCircle size={21}/>
 
-                <div className="action-text">
-                  <h4>
-                    Mis solicitudes
-                  </h4>
+            <span>
+              Nueva solicitud
+            </span>
 
-                  <p>
-                    Consulta el estado de tus solicitudes de soporte.
-                  </p>
-                </div>
+          </button>
 
-                <span className="action-arrow">
-                  →
+
+          <button
+            type="button"
+            className="sidebar-item"
+            onClick={() =>
+              goTo("/catalogo")
+            }
+          >
+
+            <BookOpen size={21}/>
+
+            <span>
+              Catálogo
+            </span>
+
+          </button>
+
+
+          {esAdministrador && (
+
+            <>
+
+              <div className="sidebar-divider"/>
+
+
+              <div className="sidebar-section">
+
+                <Settings size={20}/>
+
+                <span>
+                  Administración
                 </span>
-              </button>
-            )}
 
-            {(esOperador || esAdministrador) && (
-              <button
-                className="action-card"
-                onClick={() =>
-                  navigate("/solicitudes")
-                }
-              >
-                <div className="action-icon blue">
-                  <ClipboardList size={24} strokeWidth={1.8} />
-                </div>
+              </div>
 
-                <div className="action-text">
-                  <h4>
-                    Gestionar solicitudes
-                  </h4>
+            </>
 
-                  <p>
-                    Consulta y gestiona las solicitudes de soporte.
-                  </p>
-                </div>
+          )}
 
-                <span className="action-arrow">
-                  →
-                </span>
-              </button>
-            )}
+        </nav>
 
 
-            {/* NUEVA SOLICITUD */}
+        {/* ONDAS */}
+
+        <div className="sidebar-wave wave-a"/>
+
+        <div className="sidebar-wave wave-b"/>
+
+      </aside>
+
+
+      {/* =================================================
+          OVERLAY
+      ================================================= */}
+
+      {sidebarOpen && (
+
+        <button
+          type="button"
+          className="sidebar-overlay"
+          onClick={closeSidebar}
+          aria-label="Cerrar menú lateral"
+        />
+
+      )}
+
+
+      {/* =================================================
+          ÁREA PRINCIPAL
+      ================================================= */}
+
+      <div className="dashboard-main">
+
+
+        {/* =================================================
+            HEADER
+        ================================================= */}
+
+        <header className="dashboard-header">
+
+
+          {/* HAMBURGUESA */}
+
+          <button
+            type="button"
+            className="menu-button"
+            onClick={() =>
+              setSidebarOpen(true)
+            }
+            aria-label="Abrir menú"
+          >
+
+            <Menu size={23}/>
+
+          </button>
+
+
+          <div className="header-spacer"/>
+
+
+          <div className="header-actions">
+
+
+            {/* NOTIFICACIONES */}
 
             <button
-              className="action-card"
-              onClick={() =>
-                navigate("/nueva-solicitud")
+              type="button"
+              className="header-icon-button"
+              aria-label="Notificaciones"
+            >
+
+              <Bell size={19}/>
+
+            </button>
+
+
+            {/* LIGHT / DARK */}
+
+            <button
+              type="button"
+              className="theme-switch"
+              onClick={toggleTheme}
+              aria-label={
+                theme === "light"
+                  ? "Cambiar a modo oscuro"
+                  : "Cambiar a modo claro"
               }
             >
 
-              <div className="action-icon green">
-                   <PlusCircle size={24} strokeWidth={1.8} />
-                
-              </div>
 
-              <div className="action-text">
+              <span
+                className={
+                  theme === "light"
+                    ? "theme-option active"
+                    : "theme-option"
+                }
+              >
 
-                <h4>
-                  Nueva solicitud
-                </h4>
+                <Sun size={16}/>
 
-                <p>
-                  Registra una nueva solicitud
-                  de soporte.
-                </p>
+              </span>
 
-              </div>
 
-              <span className="action-arrow">
-                →
+              <span
+                className={
+                  theme === "dark"
+                    ? "theme-option active"
+                    : "theme-option"
+                }
+              >
+
+                <Moon size={16}/>
+
               </span>
 
             </button>
 
 
-            {/* CATÁLOGO */}
+            <div className="header-divider"/>
 
-            <button
-              className="action-card"
-              onClick={() =>
-                navigate("/catalogo")
-              }
-            >
 
-              <div className="action-icon purple">
-                    <BookOpen size={24} strokeWidth={1.8} />
-                
-              </div>
+            {/* PERFIL */}
 
-              <div className="action-text">
+            <div className="profile-container">
 
-                <h4>
-                  Catálogo
-                </h4>
 
-                <p>
-                  Consulta las categorías
-                  disponibles.
-                </p>
+              <button
+                type="button"
+                className="user-area"
+                onClick={() =>
+                  setShowProfileMenu(
+                    !showProfileMenu
+                  )
+                }
+              >
 
-              </div>
 
-              <span className="action-arrow">
-                →
-              </span>
+                <div className="user-info">
 
-            </button>
+                  <strong>
+                    {nombre}
+                  </strong>
+
+                  <span>
+                    {correo}
+                  </span>
+
+                </div>
+
+
+                <div className="user-avatar">
+
+                  {nombre
+                    .charAt(0)
+                    .toUpperCase()}
+
+                </div>
+
+
+                <ChevronDown
+                  size={16}
+                  className="profile-chevron"
+                />
+
+              </button>
+
+
+              {showProfileMenu && (
+
+                <div className="profile-menu">
+
+
+                  <div className="profile-menu-info">
+
+                    <strong>
+                      {nombre}
+                    </strong>
+
+                    <span>
+                      {correo}
+                    </span>
+
+                    <small>
+                      {rol}
+                    </small>
+
+                  </div>
+
+
+                  <div className="profile-menu-divider"/>
+
+
+                  <button
+                    type="button"
+                    className="switch-account-button"
+                    onClick={handleSwitchAccount}
+                  >
+
+                    <UserRoundCog size={18}/>
+
+                    <span>
+                      Cambiar de usuario
+                    </span>
+
+                  </button>
+
+
+                  <div className="profile-menu-divider"/>
+
+
+                  <button
+                    type="button"
+                    className="logout-button"
+                    onClick={handleLogout}
+                  >
+
+                    <LogOut size={18}/>
+
+                    <span>
+                      Cerrar sesión
+                    </span>
+
+                  </button>
+
+                </div>
+
+              )}
+
+            </div>
 
           </div>
 
-        </section>
+        </header>
 
 
-        {/* 
-            CATEGORÍAS
-         */}
+        {/* =================================================
+            CONTENIDO
+        ================================================= */}
 
-        <section className="categories-section">
+        <main className="dashboard-content">
 
-          <div className="section-title">
 
-            <div>
+          {/* =================================================
+              BIENVENIDA
+          ================================================= */}
 
-              <h3>
-                Categorías disponibles
-              </h3>
+          <section className="dashboard-welcome">
 
-              <p>
-                Tipos de soporte disponibles
-                en MesaTech Cloud.
+
+            <div className="welcome-copy">
+
+              <span className="welcome-label">
+                PANEL PRINCIPAL
+              </span>
+
+
+              <h1>
+                Hola, {primerNombre}
+              </h1>
+
+
+              <p className="welcome-role">
+                Rol: {rol}
+              </p>
+
+
+              <p className="welcome-description">
+
+                Gestiona tus solicitudes de soporte
+                de manera rápida y sencilla.
+
               </p>
 
             </div>
 
-            <button
-              className="view-catalog-button"
-              onClick={() =>
-                navigate("/catalogo")
-              }
-            >
-              Ver catálogo
-            </button>
 
-          </div>
+            <div className="welcome-cloud">
+
+              <div className="cloud-shape cloud-one"/>
+
+              <div className="cloud-shape cloud-two"/>
+
+            </div>
+
+          </section>
 
 
-          <div className="category-grid">
+          {/* =================================================
+              MÉTRICAS
+          ================================================= */}
 
-            <div className="category-card">
+          <section className="summary-grid">
 
-              <div className="category-icon">
-                   <Monitor size={26} strokeWidth={1.7} />
-                
+
+            <article className="summary-card">
+
+              <div className="summary-icon blue">
+
+                <ClipboardList size={24}/>
+
               </div>
 
               <div>
-                <h4>
-                  Hardware
-                </h4>
+
+                <strong>
+                  —
+                </strong>
+
+                <span>
+                  Solicitudes totales
+                </span>
+
+              </div>
+
+            </article>
+
+
+            <article className="summary-card">
+
+              <div className="summary-icon orange">
+
+                <Clock3 size={24}/>
+
+              </div>
+
+              <div>
+
+                <strong>
+                  —
+                </strong>
+
+                <span>
+                  En gestión
+                </span>
+
+              </div>
+
+            </article>
+
+
+            <article className="summary-card">
+
+              <div className="summary-icon green">
+
+                <CheckCircle2 size={24}/>
+
+              </div>
+
+              <div>
+
+                <strong>
+                  —
+                </strong>
+
+                <span>
+                  Resueltas
+                </span>
+
+              </div>
+
+            </article>
+
+
+            <article className="summary-card">
+
+              <div className="summary-icon purple">
+
+                <BarChart3 size={24}/>
+
+              </div>
+
+              <div>
+
+                <strong>
+                  —
+                </strong>
+
+                <span>
+                  Tasa de resolución
+                </span>
+
+              </div>
+
+            </article>
+
+          </section>
+
+
+          {/* =================================================
+              ACCIONES
+          ================================================= */}
+
+          <section className="dashboard-section">
+
+
+            <h2>
+              ¿Qué deseas hacer?
+            </h2>
+
+
+            <div className="action-grid">
+
+
+              <button
+                type="button"
+                className="action-card"
+                onClick={() =>
+                  navigate("/solicitudes")
+                }
+              >
+
+                <div className="action-icon blue">
+
+                  <ClipboardList size={25}/>
+
+                </div>
+
+
+                <div className="action-text">
+
+                  <h3>
+
+                    {esCliente
+                      ? "Mis solicitudes"
+                      : "Gestionar solicitudes"}
+
+                  </h3>
+
+
+                  <p>
+
+                    {esCliente
+                      ? "Consulta el estado de tus solicitudes de soporte."
+                      : "Consulta y gestiona las solicitudes de soporte."}
+
+                  </p>
+
+                </div>
+
+
+                <span className="action-arrow">
+                  →
+                </span>
+
+              </button>
+
+
+              <button
+                type="button"
+                className="action-card"
+                onClick={() =>
+                  navigate("/nueva-solicitud")
+                }
+              >
+
+                <div className="action-icon green">
+
+                  <PlusCircle size={25}/>
+
+                </div>
+
+
+                <div className="action-text">
+
+                  <h3>
+                    Nueva solicitud
+                  </h3>
+
+                  <p>
+                    Registra una nueva solicitud de soporte.
+                  </p>
+
+                </div>
+
+
+                <span className="action-arrow">
+                  →
+                </span>
+
+              </button>
+
+
+              <button
+                type="button"
+                className="action-card"
+                onClick={() =>
+                  navigate("/catalogo")
+                }
+              >
+
+                <div className="action-icon purple">
+
+                  <BookOpen size={25}/>
+
+                </div>
+
+
+                <div className="action-text">
+
+                  <h3>
+                    Catálogo
+                  </h3>
+
+                  <p>
+                    Consulta las categorías disponibles.
+                  </p>
+
+                </div>
+
+
+                <span className="action-arrow">
+                  →
+                </span>
+
+              </button>
+
+            </div>
+
+          </section>
+
+
+          {/* =================================================
+              CATEGORÍAS
+          ================================================= */}
+
+          <section className="dashboard-section categories-section">
+
+
+            <div className="section-header">
+
+
+              <div>
+
+                <h2>
+                  Categorías disponibles
+                </h2>
 
                 <p>
-                  Equipos y componentes
+
+                  Tipos de soporte disponibles
+                  en MesaTech Cloud.
+
                 </p>
+
               </div>
+
+
+              <button
+                type="button"
+                className="catalog-button"
+                onClick={() =>
+                  navigate("/catalogo")
+                }
+              >
+
+                Ver catálogo
+
+                <span>
+                  →
+                </span>
+
+              </button>
 
             </div>
 
 
-            <div className="category-card">
+            <div className="category-grid">
 
-              <div className="category-icon">
-                    <MonitorCog size={26} strokeWidth={1.7} />
-                
-              </div>
 
-              <div>
-                <h4>
-                  Software
-                </h4>
+              <article className="category-card">
 
-                <p>
-                  Aplicaciones y sistemas
-                </p>
-              </div>
+                <div className="category-icon">
+
+                  <Monitor size={27}/>
+
+                </div>
+
+                <div>
+
+                  <h3>
+                    Hardware
+                  </h3>
+
+                  <p>
+                    Equipos y componentes
+                  </p>
+
+                </div>
+
+              </article>
+
+
+              <article className="category-card">
+
+                <div className="category-icon">
+
+                  <MonitorCog size={27}/>
+
+                </div>
+
+                <div>
+
+                  <h3>
+                    Software
+                  </h3>
+
+                  <p>
+                    Aplicaciones y sistemas
+                  </p>
+
+                </div>
+
+              </article>
+
+
+              <article className="category-card">
+
+                <div className="category-icon">
+
+                  <Network size={27}/>
+
+                </div>
+
+                <div>
+
+                  <h3>
+                    Redes
+                  </h3>
+
+                  <p>
+                    Conectividad y comunicaciones
+                  </p>
+
+                </div>
+
+              </article>
+
+
+              <article className="category-card">
+
+                <div className="category-icon">
+
+                  <KeyRound size={27}/>
+
+                </div>
+
+                <div>
+
+                  <h3>
+                    Accesos
+                  </h3>
+
+                  <p>
+                    Usuarios y permisos
+                  </p>
+
+                </div>
+
+              </article>
 
             </div>
 
-
-            <div className="category-card">
-
-              <div className="category-icon">
-                   <Network size={26} strokeWidth={1.7} />
-                
-              </div>
-
-              <div>
-                <h4>
-                  Redes
-                </h4>
-
-                <p>
-                  Conectividad y comunicaciones
-                </p>
-              </div>
-
-            </div>
+          </section>
 
 
-            <div className="category-card">
+          <footer className="dashboard-footer">
 
-              <div className="category-icon">
-                    <KeyRound size={26} strokeWidth={1.7} />
+            Desarrollado por Alexis Poblete y Damian Villanueva
 
-                
-              </div>
+            {" | "}
 
-              <div>
-                <h4>
-                  Accesos
-                </h4>
+            Desarrollo Cloud Native 2026
 
-                <p>
-                  Usuarios y permisos
-                </p>
-              </div>
-
-            </div>
-
-          </div>
-
-        </section>
-
-      </main>
+          </footer>
 
 
-      {/* 
-          FOOTER
-       */}
+        </main>
 
-     <footer className="developer-signature">
-
-          Desarrollado por Alexis Poblete, Damian Villanueva y Francisco Vásquez | Sistema creado para la asignatura de Desarrollo Cloud Native 2026
-
-        </footer>
+      </div>
 
     </div>
+
   );
+
 }
 
 export default Home;

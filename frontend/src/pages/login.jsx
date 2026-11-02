@@ -4,6 +4,7 @@ import {InteractionStatus, InteractionRequiredAuthError,} from "@azure/msal-brow
 import { useNavigate } from "react-router-dom";
 import { loginRequest } from "../auth/msalConfig";
 import "./login.css";
+import logo from "../assets/mesatech-logo.png";
 
 
 function Login() {
@@ -95,7 +96,7 @@ function Login() {
   };
 
   // LOGIN
-  
+
 
   const handleLogin = async (event) => {
 
@@ -187,141 +188,171 @@ function Login() {
 
   return (
 
-    <div className="login-page">
-      <div className="login-container">
+    <main className="login-page">
+                <section className="login-shell">
 
-        {/* ENCABEZADO */}
+                    {/* Logo compartido por ambos paneles */}
+                    <div className="login-brand">
+                        <img
+                            src={logo}
+                            alt="MesaTech Cloud"
+                            className="login-logo"
+                        />
+                    </div>
 
-        <div className="login-header">
-          <h1>
-            MESATECH CLOUD
-          </h1>
-          <p>
-            Sistema ERP para PYMEs
-          </p>
-        </div>
-        
+                    {/* Panel izquierdo */}
+                    <section className="login-info-panel">
+                        <div className="login-info-content">
+                            <h1>
+                                Plataforma de{" "}
+                                <span>mesa de ayuda</span>
+                            </h1>
 
+                            <p className="login-description">
+                                Gestiona solicitudes, servicios y recursos de soporte TI
+                                de forma eficiente y segura.
+                            </p>
 
-        {/* USUARIO NO AUTENTICADO */}
+                            <div className="feature-list">
 
-        {!isAuthenticated && (
-          <div className="login-card">
-            <h2>
-              Iniciar sesión
-            </h2>
-            <p className="login-subtitle">
-              Ingresa con tu cuenta corporativa de Microsoft
-            </p>
+                                <article className="feature-item">
+                                    <div className="feature-icon">
+                                        <svg
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="1.8"
+                                        >
+                                            <rect x="5" y="4" width="14" height="17" rx="2"/>
+                                            <path d="M9 4V2h6v2"/>
+                                            <path d="M9 9h6"/>
+                                            <path d="M9 13h6"/>
+                                            <path d="M9 17h4"/>
+                                        </svg>
+                                    </div>
 
-            <form onSubmit={handleLogin}>
+                                    <div>
+                                        <h2>Gestión de solicitudes</h2>
+                                        <p>Registro, seguimiento y resolución.</p>
+                                    </div>
+                                </article>
 
-              <button
-                type="submit"
-                className="login-button"
-                disabled={
-                  loading ||
-                  inProgress !==
-                    InteractionStatus.None
-                }>
-                {loading
-                  ? "Iniciando sesión..."
-                  : "Iniciar sesión con Microsoft"}
-              </button>
+                                <article className="feature-item">
+                                    <div className="feature-icon">
+                                        <svg
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="1.8"
+                                        >
+                                            <path d="m12 3 9 5-9 5-9-5 9-5Z"/>
+                                            <path d="m3 12 9 5 9-5"/>
+                                            <path d="m3 16 9 5 9-5"/>
+                                        </svg>
+                                    </div>
 
-              {error && (
-                <p className="error-message">
-                  {error}
-                </p>
-              )}
-            </form>
-          </div>
-        )}
+                                    <div>
+                                        <h2>Catálogo de servicios</h2>
+                                        <p>Consulta de categorías y servicios.</p>
+                                    </div>
+                                </article>
 
-        {/* USUARIO AUTENTICADO */}
+                                <article className="feature-item">
+                                    <div className="feature-icon">
+                                        <svg
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="1.8"
+                                        >
+                                            <rect x="9" y="2" width="6" height="6" rx="1"/>
+                                            <rect x="2" y="16" width="6" height="6" rx="1"/>
+                                            <rect x="16" y="16" width="6" height="6" rx="1"/>
+                                            <path d="M12 8v4"/>
+                                            <path d="M5 16v-2h14v2"/>
+                                        </svg>
+                                    </div>
 
-        {isAuthenticated && account && (
-          <div className="login-card">
-            <h2>
-              Bienvenido
-            </h2>
-            <p className="login-subtitle">
-              Has iniciado sesión correctamente
-            </p>
+                                    <div>
+                                        <h2>Roles y accesos</h2>
+                                        <p>Control de acceso con Microsoft Entra ID.</p>
+                                    </div>
+                                </article>
 
-            <div className="authenticated-user">
-              <p>
-                <strong>
-                  Nombre:
-                </strong>{" "}
-                {account.name}
-              </p>
+                                <article className="feature-item">
+                                    <div className="feature-icon">
+                                        <svg
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="1.8"
+                                        >
+                                            <path d="M17.5 19H7a5 5 0 0 1-.5-9.97A7 7 0 0 1 20 11a4 4 0 0 1-2.5 8Z"/>
+                                        </svg>
+                                    </div>
 
-              <p>
-                <strong>
-                  Correo:
-                </strong>{" "}
-                {account.username}
-              </p>
+                                    <div>
+                                        <h2>Cloud Native</h2>
+                                        <p>Arquitectura en AWS y RabbitMQ.</p>
+                                    </div>
+                                </article>
 
-              {/* CLAIM */}
+                            </div>
+                        </div>
 
-              <p>
-                <strong>
-                  Claim:
-                </strong>{" "}
-                {account.idTokenClaims
-                  ?.preferred_username ||
-                  account.idTokenClaims
-                    ?.email ||
-                  "No disponible"}
-              </p>
-            </div>
+                        <div className="login-wave wave-one"/>
+                        <div className="login-wave wave-two"/>
+                    </section>
 
-            {/* TOKEN */}
+                    {/* Panel derecho */}
+                    <section className="login-access-panel">
+                        <div className="login-access-content">
 
-            <div className="token-status">
-              {tokenObtained ? (
-                <p>
-                   Access Token obtenido
-                </p>
-              ) : (
-                <p>
-                  Access Token no disponible
-                </p>
-              )}
-            </div>
+                            <h2 className="welcome-title">
+                                Bienvenido
+                            </h2>
 
-            {/* ERROR */}
+                            <p className="welcome-description">
+                                Accede con tu cuenta corporativa
+                                <br/>
+                                de Microsoft
+                            </p>
 
-            {error && (
-              <p className="error-message">
-                {error}
-              </p>
-            )}
+                            <button
+                                type="button"
+                                className="microsoft-login-button"
+                                onClick={handleLogin}
+                            >
+                                <span className="microsoft-logo" aria-hidden="true">
+                                    <span/>
+                                    <span/>
+                                    <span/>
+                                    <span/>
+                                </span>
 
+                                <span>
+                                    Iniciar sesión con Microsoft
+                                </span>
+                            </button>
 
-            {/* LOGOUT */}
+                            <div className="login-information">
+                                <div className="information-icon">
+                                    i
+                                </div>
 
-            <button
-              type="button"
-              className="login-button"
-              onClick={handleLogout}
-            >
-              Cerrar sesión
-            </button>
-          </div>
-        )}
+                                <p>
+                                    Usa tu cuenta institucional para
+                                    <br/>
+                                    acceder al sistema.
+                                </p>
+                            </div>
 
-        {/* FIRMA */}
+                        </div>
+                    </section>
 
-        <footer className="developer-signature">
-          Desarrollado por Alexis Poblete, Damian Villanueva y Francisco Vásquez | Sistema creado para la asignatura de Desarrollo Cloud Native 2026
-        </footer>
-      </div>
-    </div>
-  );
-}
+                </section>
+            </main>
+        );
+    }
 
-
-export default Login;
+    export default Login;
